@@ -40,6 +40,7 @@
             --button-secondary-bg: #e2e8f0; --button-secondary-hover: #cbd5e1; --button-secondary-text: #334155;
             --button-primary-bg: var(--primary-color); --button-primary-hover: var(--primary-accent); --button-primary-text: #ffffff;
             --textarea-bg: var(--bg-color);
+            --active-hour-indicator: var(--primary-accent); /* Color for active hour top border */
         }
         body[data-theme='grey'] {
              --bg-color: #e5e7eb; --text-color: #1f2937; --tile-bg: #f9fafb; --tile-shadow: rgba(0, 0, 0, 0.05);
@@ -57,6 +58,7 @@
             --history-entry-border: #f3f4f6;
             --button-secondary-bg: #d1d5db; --button-secondary-hover: #9ca3af; --button-secondary-text: #1f2937;
             --textarea-bg: var(--bg-color);
+            --active-hour-indicator: var(--primary-accent);
         }
         body[data-theme='dark'] {
             --bg-color: #111827; --text-color: #f9fafb; --tile-bg: #1f2937; --tile-shadow: rgba(0, 0, 0, 0.2);
@@ -77,6 +79,7 @@
             --button-secondary-bg: #374151; --button-secondary-hover: #4b5563; --button-secondary-text: #d1d5db;
             --button-primary-text: #111827;
             --textarea-bg: #374151; /* Darker background for textarea in dark mode */
+            --active-hour-indicator: var(--primary-accent);
         }
 
         /* --- Component Styles --- */
@@ -91,18 +94,55 @@
         .text-primary-accent { color: var(--primary-accent); }
 
         /* Time Block Styles (Shared) */
-        .time-block { border-radius: 3px; flex-shrink: 0; transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease; overflow: hidden; border: 1px solid var(--grid-border); }
+        .time-block {
+            border-radius: 3px;
+            flex-shrink: 0;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease, border-top-color 0.3s ease; /* Added border-top-color */
+            overflow: hidden;
+            border: 1px solid var(--grid-border);
+            border-top-width: 1px; /* Default top border */
+        }
         .time-block.past { background: linear-gradient(135deg, var(--grid-past-color-start), var(--grid-past-color-end)); border-color: var(--grid-past-border); opacity: 0.6; transform: scale(1); box-shadow: none; z-index: 1; }
         .time-block.current { background: linear-gradient(135deg, var(--grid-current-color-start), var(--grid-current-color-end)); border: 1px solid var(--grid-current-border); box-shadow: 0 0 6px 1px var(--grid-current-border); transform: scale(1.1); z-index: 10; position: relative; opacity: 1.0; }
         /* Future blocks get background set by JS */
 
-        /* Active Hours Bar Specifics */
-        #active-hours-bar .time-block { width: 16px; height: 16px; }
+        /* --- NEW: Style for slots within active hours --- */
+        .time-block.active-hour-slot {
+            border-top-width: 2px; /* Make top border thicker */
+            border-top-color: var(--active-hour-indicator); /* Use indicator color */
+        }
+        /* Adjustments for specific states */
+        .time-block.active-hour-slot.past {
+             opacity: 0.7; /* Slightly less faded than normal past slots */
+             /* Keep the active top border */
+             border-top-color: var(--active-hour-indicator);
+             /* Ensure other borders match the past state */
+             border-left-color: var(--grid-past-border);
+             border-right-color: var(--grid-past-border);
+             border-bottom-color: var(--grid-past-border);
+        }
+         .time-block.active-hour-slot.current {
+             /* Keep the current border style, which overrides the top border */
+             border: 1px solid var(--grid-current-border);
+             /* The general .current style already provides strong emphasis */
+         }
+         .time-block.active-hour-slot.future {
+             /* Keep the active top border */
+             border-top-color: var(--active-hour-indicator);
+             /* Ensure other borders match the future state (which uses --grid-border) */
+             border-left-color: var(--grid-border);
+             border-right-color: var(--grid-border);
+             border-bottom-color: var(--grid-border);
+         }
+
+
+        /* Active Hours Bar Specifics - REMOVED */
+        /* #active-hours-bar .time-block { width: 16px; height: 16px; } */
         .bar-container { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; }
 
         /* Full Day Slots Bar Specifics */
-        #full-day-slots-bar .time-block { width: 10px; height: 10px; }
-        #full-day-slots-bar { gap: 2px; margin-bottom: 1rem; }
+        #full-day-slots-bar .time-block { width: 18px; height: 18px; }
+        #full-day-slots-bar { gap: 2px; margin-bottom: 1rem; } /* Keep margin for spacing */
 
         /* --- Other styles --- */
         .progress-bar-bg { background-color: var(--progress-bg); }
@@ -142,10 +182,7 @@
         .theme-switcher { background-color: var(--tile-bg); border-radius: 0.5rem; padding: 0.5rem; box-shadow: 0 2px 4px -1px var(--tile-shadow); margin-bottom: 1.5rem; }
         .theme-button { background-color: var(--theme-button-bg); border-radius: 0.375rem; padding: 0.5rem; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; border: 2px solid transparent; /* Keep transparent border for layout consistency */ }
         .theme-button:hover { background-color: var(--theme-button-hover); }
-        /* --- MODIFIED RULE --- */
         .theme-button.active {
-            /* border-color: var(--theme-button-active); /* Removed */
-            /* box-shadow: 0 0 0 2px var(--theme-button-active); /* Removed */
             /* Active state is now indicated only by the icon color change below */
         }
         .theme-button svg { color: var(--theme-button-icon); transition: color 0.3s ease; width: 20px; height: 20px; display: block; }
@@ -238,7 +275,7 @@
 
         <div class="modal-buttons">
             <button id="close-settings-button" class="button-secondary">Close</button>
-            <button id="save-settings-button" class="button-primary">Save</button>
+            <button id="save-settings-button" class="button-primary">Save Hours</button>
         </div>
     </div>
 
@@ -294,18 +331,12 @@
             </div>
 
             <div class="tile p-6 rounded-lg flex flex-col">
-                <h3 class="tile-title text-sm font-semibold mb-1 text-center md:text-left">Full Day Slots (00:00 - 24:00)</h3>
+                 <h3 class="tile-title text-sm font-semibold mb-1 text-center md:text-left">
+                    Full Day Slots (Active: <span id="active-hours-range-display-inline">--</span>)
+                </h3>
                 <div id="full-day-slots-bar" class="bar-container justify-center md:justify-start">
                     </div>
-                <div class="mt-4">
-                    <div class="flex justify-between items-center mb-1">
-                        <h3 class="tile-title text-lg font-semibold">Active Hours (<span id="active-hours-range-display"></span>)</h3>
-                        <span id="active-hours-count" class="text-sm text-muted">(0/0)</span>
-                    </div>
-                    <div id="active-hours-bar" class="bar-container">
-                        </div>
                 </div>
-            </div>
         </div>
 
         <div class="tile p-6 rounded-lg">
@@ -341,13 +372,11 @@
 
             <div class="add-task-container">
                 <input type="text" id="new-task-input" placeholder="Add a new task..." class="input-field">
-                <button id="load-template-button" class="button-base button-load-template" title="Load tasks from template">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>
-                    Load
-                </button>
                 <button id="add-task-button" class="button-base button-add">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Add
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add
+                </button>
+                <button id="load-template-button" class="button-base button-load-template" title="Load tasks from template">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg> Load
                 </button>
             </div>
         </div>
@@ -360,7 +389,8 @@
         // --- DOM Elements ---
         // Declare all element variables here
         let dateDisplay, timeDisplay, slotTimerDisplay, slotsPassedDisplay,
-            activeHoursBarContainer, activeHoursCountSpan, activeHoursRangeDisplay,
+            /* REMOVED: activeHoursBarContainer, activeHoursCountSpan, activeHoursRangeDisplay, */
+            activeHoursRangeDisplayInline, // ADDED: For inline display
             fullDaySlotsBarContainer,
             taskListContainer, newTaskInput, addTaskButton, loadTemplateButton,
             progressBarInner, progressPercentage,
@@ -501,7 +531,7 @@
             }
             // Populate UI elements that depend on loaded state *after* loading
             populateHourSelects();
-            updateActiveHoursDisplay();
+            updateActiveHoursDisplay(); // Update the inline display text
         }
 
         function saveState() {
@@ -522,7 +552,6 @@
 
         // --- Confirmation Modal Logic ---
         function showConfirmationModal(message, onConfirm) {
-            // *** DEBUG LOGGING ADDED ***
             console.log("Attempting to show confirmation modal...");
             console.log("Confirm Modal Element:", confirmModal);
             console.log("Confirm Overlay Element:", confirmOverlay);
@@ -530,7 +559,6 @@
 
             if (!confirmModal || !confirmOverlay || !confirmMessage) {
                 console.error("Confirmation modal elements not found!");
-                // Provide a basic browser confirm as a fallback
                 if (confirm("Fallback: " + message)) {
                     if (typeof onConfirm === 'function') {
                          try { onConfirm(); } catch (e) { console.error("Error in fallback confirm callback:", e); }
@@ -541,7 +569,7 @@
 
             console.log("Setting confirmation message:", message);
             confirmMessage.textContent = message;
-            currentConfirmCallback = onConfirm; // Store the function to call on 'Yes'
+            currentConfirmCallback = onConfirm;
             console.log("Assigning callback:", currentConfirmCallback);
 
             console.log("Adding 'visible' class to overlay...");
@@ -556,7 +584,7 @@
             console.log("Hiding confirmation modal.");
             confirmOverlay.classList.remove('visible');
             confirmModal.classList.remove('visible');
-            currentConfirmCallback = null; // Clear the stored callback
+            currentConfirmCallback = null;
         }
 
         function handleConfirmYes() {
@@ -567,15 +595,15 @@
             if (typeof currentConfirmCallback === 'function') {
                 console.log("Executing confirmation callback.");
                 try {
-                    currentConfirmCallback(); // Execute the stored action
+                    currentConfirmCallback();
                 } catch (error) {
                     console.error("Error executing confirmation callback:", error);
-                    alert("An error occurred while performing the action."); // User feedback
+                    alert("An error occurred while performing the action.");
                 }
             } else {
                  console.warn("No confirmation callback stored or it's not a function.");
             }
-            hideConfirmationModal(); // Hide modal AFTER executing (or attempting to execute) callback
+            hideConfirmationModal();
         }
 
         // --- Settings Modal Logic ---
@@ -584,11 +612,9 @@
                 console.error("Cannot open settings: one or more modal elements missing.");
                 return;
             }
-            // Populate with current settings
             startHourSelect.value = activeStartHour;
             endHourSelect.value = activeEndHour;
             taskTemplateTextarea.value = taskTemplate;
-            // Make visible
             settingsOverlay.classList.add('visible');
             settingsModal.classList.add('visible');
             console.log("Settings modal opened.");
@@ -614,23 +640,20 @@
             activeStartHour = newStart;
             activeEndHour = newEnd;
 
-            // Save to localStorage
             try {
                 localStorage.setItem(LS_START_HOUR_KEY, activeStartHour);
                 localStorage.setItem(LS_END_HOUR_KEY, activeEndHour);
                 console.log("Active hours saved to localStorage:", activeStartHour, activeEndHour);
             } catch (e) {
                 console.error("Could not save active hours to localStorage:", e);
-                alert("Error saving hours settings."); // User feedback
+                alert("Error saving hours settings.");
             }
 
-            // Update UI immediately
-            updateActiveHoursDisplay();
-            generateActiveHoursBar(); // Regenerate the bar based on new hours
-            updateDateTime(); // Force immediate update of highlights
+            updateActiveHoursDisplay(); // Update the inline display text
+            // generateActiveHoursBar(); // REMOVED: No longer needed
+            updateDateTime(); // Force immediate update of highlights on the full day bar
 
-            alert("Active hours saved!"); // User feedback
-            // Optionally close the modal after saving hours: closeSettingsModal();
+            alert("Active hours saved!");
         }
 
         function populateHourSelects() {
@@ -638,51 +661,50 @@
                 console.error("Hour select elements not found for population.");
                 return;
             }
-            startHourSelect.innerHTML = ''; // Clear existing options
+            startHourSelect.innerHTML = '';
             endHourSelect.innerHTML = '';
 
             for (let i = 0; i < 24; i++) {
-                // Start Hour options (00:00 to 23:00)
                 const startOption = document.createElement('option');
                 startOption.value = i;
                 startOption.textContent = `${String(i).padStart(2, '0')}:00`;
                 startHourSelect.appendChild(startOption);
 
-                // End Hour options (01:00 to 24:00)
                 const endOption = document.createElement('option');
-                endOption.value = i + 1; // End hour is exclusive, so value is the start of the *next* hour
+                endOption.value = i + 1;
                 endOption.textContent = `${String(i + 1).padStart(2, '0')}:00`;
                 endHourSelect.appendChild(endOption);
             }
         }
 
         function formatHourForDisplay(hour) {
-            if (hour === 0 || hour === 24) return '12a'; // Midnight/End of Day
-            if (hour === 12) return '12p'; // Noon
-            if (hour < 12) return `${hour}a`; // AM
-            return `${hour - 12}p`; // PM
+            if (hour === 0 || hour === 24) return '12a';
+            if (hour === 12) return '12p';
+            if (hour < 12) return `${hour}a`;
+            return `${hour - 12}p`;
         }
 
+        // --- MODIFIED: Updates the inline text display ---
         function updateActiveHoursDisplay() {
-            if (!activeHoursRangeDisplay) {
-                console.error("activeHoursRangeDisplay element not found");
+            if (!activeHoursRangeDisplayInline) { // Use the new inline span ID
+                console.error("activeHoursRangeDisplayInline element not found");
                 return;
             }
-            activeHoursRangeDisplay.textContent = `${formatHourForDisplay(activeStartHour)}-${formatHourForDisplay(activeEndHour)}`;
+            activeHoursRangeDisplayInline.textContent = `${formatHourForDisplay(activeStartHour)}-${formatHourForDisplay(activeEndHour)}`;
         }
 
 
         // --- Task Template Logic ---
         function saveTaskTemplate() {
             if (!taskTemplateTextarea) return;
-            taskTemplate = taskTemplateTextarea.value; // Get current value from textarea
+            taskTemplate = taskTemplateTextarea.value;
             try {
                 localStorage.setItem(LS_TEMPLATE_KEY, taskTemplate);
                 console.log("Task template saved to localStorage.");
-                alert("Task template saved successfully!"); // User feedback
+                alert("Task template saved successfully!");
             } catch (e) {
                 console.error("Could not save task template to localStorage:", e);
-                alert("Error saving task template."); // User feedback
+                alert("Error saving task template.");
             }
         }
 
@@ -695,35 +717,32 @@
             }
             console.log("Current task template:", taskTemplate);
 
-            // Use the custom confirmation modal
             showConfirmationModal(
                 "This will replace your current tasks with the template. Are you sure?",
-                () => { // Callback function if user confirms
+                () => {
                     console.log("Load template confirmed by user via custom modal.");
                     try {
                         const templateLines = taskTemplate.split('\n')
-                            .map(line => line.trim()) // Remove whitespace
-                            .filter(line => line.length > 0); // Remove empty lines
+                            .map(line => line.trim())
+                            .filter(line => line.length > 0);
 
                         console.log("Parsed template lines:", templateLines);
 
                         if (templateLines.length === 0) {
                             console.log("Template is empty after parsing.");
                             alert("Template is empty or contains only whitespace.");
-                            return; // Don't clear tasks if template is effectively empty
+                            return;
                         }
 
-                        // Clear existing tasks and reset ID counter
                         tasks = [];
-                        nextTaskId = 1; // Reset ID for the new list
+                        nextTaskId = 1;
                         console.log("Cleared tasks array, resetting nextTaskId to 1.");
 
-                        // Add tasks from template
                         templateLines.forEach(line => {
                             const newTask = {
                                 id: nextTaskId++,
                                 text: line,
-                                completed: false // New tasks start as incomplete
+                                completed: false
                             };
                             tasks.push(newTask);
                             console.log("Added task from template:", newTask);
@@ -733,14 +752,14 @@
                         logHistoryEvent('template', `Loaded ${templateLines.length} tasks`);
 
                         console.log("Rendering tasks...");
-                        renderTasks(); // Update the UI
+                        renderTasks();
 
                         console.log("Load template process finished.");
-                        alert(`Loaded ${templateLines.length} tasks from template.`); // User feedback
+                        alert(`Loaded ${templateLines.length} tasks from template.`);
 
                     } catch (error) {
                         console.error("Error loading task template:", error);
-                        alert("An error occurred while loading the template."); // User feedback
+                        alert("An error occurred while loading the template.");
                     }
                 }
             );
@@ -754,22 +773,21 @@
                 return;
             }
 
-            // Use the custom confirmation modal
             showConfirmationModal(
                 "Are you sure you want to delete ALL tasks? This cannot be undone.",
-                () => { // Callback function if user confirms
+                () => {
                     console.log("Clear tasks confirmed by user via custom modal.");
                     try {
                         const count = tasks.length;
-                        tasks = []; // Clear the tasks array
+                        tasks = [];
                         console.log("Tasks array cleared. Logging history event...");
                         logHistoryEvent('cleared', `Cleared ${count} tasks`);
 
                         console.log("Rendering tasks...");
-                        renderTasks(); // Update the UI
+                        renderTasks();
 
                         console.log("Clear tasks process finished.");
-                        alert(`Cleared ${count} tasks.`); // User feedback
+                        alert(`Cleared ${count} tasks.`);
                     } catch(e) {
                          console.error("Error clearing tasks:", e);
                          alert("An error occurred while clearing tasks.");
@@ -779,34 +797,32 @@
         }
 
         function clearHistory() {
-            console.log("clearHistory function called."); // Log when function starts
+            console.log("clearHistory function called.");
             if (taskHistory.length === 0) {
                 alert("History is already empty.");
                 return;
             }
 
-            // Use the custom confirmation modal
             showConfirmationModal(
                 "Are you sure you want to clear the entire task history? This cannot be undone.",
-                () => { // This is the callback function executed if user clicks "Yes"
-                    console.log("Executing 'Clear History' confirmation callback."); // Log start of callback
+                () => {
+                    console.log("Executing 'Clear History' confirmation callback.");
                     try {
                         const count = taskHistory.length;
                         console.log(`Current history length: ${count}. Clearing array...`);
-                        taskHistory = []; // Clear the array
+                        taskHistory = [];
                         console.log("History array cleared. Saving state...");
-                        saveState(); // Save the empty history (important!)
+                        saveState();
                         console.log("Checking if history tab is active...");
-                        // Update UI only if the history tab is currently visible
                         if (tabHistory && tabHistory.classList.contains('active')) {
                             console.log("History tab is active, rendering history...");
-                            renderHistory(); // Update UI
+                            renderHistory();
                         }
                         console.log("Clear history process finished inside callback.");
-                        alert(`Cleared ${count} history events.`); // User feedback
+                        alert(`Cleared ${count} history events.`);
                     } catch(e) {
                         console.error("Error inside clearHistory callback:", e);
-                        alert("An error occurred while clearing history."); // User feedback
+                        alert("An error occurred while clearing history.");
                     }
                 }
             );
@@ -816,10 +832,9 @@
         // --- Theme Management ---
         function applyTheme(themeName) {
             console.log(`Applying theme: ${themeName}`);
-            document.body.dataset.theme = themeName; // Set the data attribute on the body
+            document.body.dataset.theme = themeName;
 
-            // Update button active states
-            if(themeButtons){ // Check if buttons exist
+            if(themeButtons){
                 themeButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.themeValue === themeName);
                 });
@@ -827,15 +842,14 @@
                 console.warn("Theme buttons not found when applying theme.");
             }
 
-            // Re-apply highlights after theme change as colors might have updated
-            if(appInitialized) { // Only run if app is fully loaded
-                 updateDateTime(); // This will re-run the highlight functions which use getThemeColor
+            if(appInitialized) {
+                 updateDateTime();
             }
         }
 
         function setupThemeSwitcher() {
             console.log("Setting up theme switcher...");
-            if (!themeButtons || themeButtons.length === 0) { // Check if buttons exist
+            if (!themeButtons || themeButtons.length === 0) {
                 console.error("Theme buttons not found during setup.");
                 return;
             }
@@ -843,7 +857,6 @@
                 button.addEventListener('click', () => {
                     const selectedTheme = button.dataset.themeValue;
                     applyTheme(selectedTheme);
-                    // Save the selected theme to localStorage
                     try {
                         localStorage.setItem(LS_THEME_KEY, selectedTheme);
                     } catch (e) {
@@ -851,9 +864,8 @@
                     }
                 });
             });
-            // Apply the initially loaded or default theme's active state
             const currentTheme = document.body.dataset.theme || DEFAULT_THEME;
-            applyTheme(currentTheme); // Ensure correct button is active on load
+            applyTheme(currentTheme);
 
             console.log(`Initial theme setup complete. Current theme: ${currentTheme}`);
         }
@@ -863,58 +875,41 @@
             try {
                 const now = new Date();
 
-                // Format Date (e.g., 21 Apr 2025)
                 const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
                 if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString('en-GB', dateOptions);
                 else console.warn("dateDisplay element not found during update.");
 
-                // Format Time (e.g., 06:56:00 pm)
                 const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
                 if (timeDisplay) timeDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions).toLowerCase();
                 else console.warn("timeDisplay element not found during update.");
 
-                // Update visual elements based on current time
-                updateActiveHoursHighlight(now);
-                updateFullDaySlotsHighlight(now);
+                // updateActiveHoursHighlight(now); // REMOVED: Logic merged below
+                updateFullDaySlotsHighlight(now); // This now handles active hour styling too
                 updateSlotTimer(now);
 
             } catch (error) {
                 console.error("Error in updateDateTime:", error);
-                // Stop the interval if there's a persistent error
                 if(intervalId) clearInterval(intervalId);
-                // Optionally display an error message to the user in the UI
             }
         }
 
         // --- Time Bars ---
-        function generateTimeBlocks(container, totalSlots, isFullDayBar) {
+        // REMOVED: generateActiveHoursBar function
+
+        function generateTimeBlocks(container, totalSlots) { // Simplified: Only generates full day now
              if (!container) {
-                console.error(`Container element not found for generating ${isFullDayBar ? 'full day' : 'active hours'} bar.`);
-                return 0; // Indicate failure or no slots generated
+                console.error(`Container element not found for generating full day bar.`);
+                return 0;
             }
-            container.innerHTML = ''; // Clear previous blocks
+            container.innerHTML = '';
             let generatedCount = 0;
 
             for (let i = 0; i < totalSlots; i++) {
                 const block = document.createElement('div');
                 block.classList.add('time-block');
+                const actualSlotIndex24 = i; // Index is direct for full day bar
+                block.dataset.slotIndex24 = actualSlotIndex24;
 
-                let actualSlotIndex24;
-                if (isFullDayBar) {
-                    actualSlotIndex24 = i; // For full day, index is direct
-                } else {
-                    // For active hours, calculate the 24-hour index
-                    actualSlotIndex24 = (activeStartHour * SLOTS_PER_HOUR) + i;
-                    // Basic sanity check
-                    if (actualSlotIndex24 >= (activeEndHour * SLOTS_PER_HOUR)) {
-                        console.warn(`Calculated slot index ${actualSlotIndex24} exceeds active end hour range. Skipping.`);
-                        continue; // Skip generating this block if calculation seems off
-                    }
-                }
-
-                block.dataset.slotIndex24 = actualSlotIndex24; // Store the 0-47 index
-
-                // Calculate time string for tooltip
                 const hour = Math.floor(actualSlotIndex24 / SLOTS_PER_HOUR);
                 const minute = (actualSlotIndex24 % SLOTS_PER_HOUR) * 30;
                 const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
@@ -923,67 +918,61 @@
                 container.appendChild(block);
                 generatedCount++;
             }
-            console.log(`Generated ${generatedCount} ${isFullDayBar ? 'full day' : 'active'} slot blocks.`);
+            console.log(`Generated ${generatedCount} full day slot blocks.`);
             return generatedCount;
-        }
-
-        function generateActiveHoursBar() {
-            console.log("Generating active hours bar...");
-            const totalActiveSlots = (activeEndHour - activeStartHour) * SLOTS_PER_HOUR;
-
-            if (totalActiveSlots <= 0 || !Number.isInteger(totalActiveSlots)) {
-                console.warn("Invalid active hours range, no slots generated.");
-                if (activeHoursBarContainer) activeHoursBarContainer.innerHTML = '<p class="text-xs text-muted">Invalid range</p>';
-                if (activeHoursCountSpan) activeHoursCountSpan.textContent = `(0/0)`;
-                return;
-            }
-            generateTimeBlocks(activeHoursBarContainer, totalActiveSlots, false);
         }
 
         function generateFullDaySlotsBar() {
             console.log("Generating full day slots bar...");
-            generateTimeBlocks(fullDaySlotsBarContainer, TOTAL_DAY_SLOTS, true);
+            generateTimeBlocks(fullDaySlotsBarContainer, TOTAL_DAY_SLOTS);
         }
 
-        function updateHighlightGeneric(container, currentTime, isFullDayBar) {
+        // REMOVED: updateActiveHoursHighlight function
+
+        // --- MODIFIED: updateHighlightGeneric is now only for the full day bar ---
+        // --- and includes logic to add 'active-hour-slot' class ---
+        function updateFullDaySlotsHighlight(currentTime) {
+            const container = fullDaySlotsBarContainer; // Directly use the full day container
             if (!container) {
-                // This warning is helpful but can be noisy if expected (e.g., during init)
-                // console.warn(`Container not found for highlighting (isFullDayBar: ${isFullDayBar})`);
+                console.warn(`Full day slots container not found for highlighting`);
                 return;
             }
             try {
                 const currentHour = currentTime.getHours();
                 const currentMinute = currentTime.getMinutes();
-                // Calculate the index (0-47) of the current 30-minute slot
                 const currentSlotIndex24 = Math.floor((currentHour * 60 + currentMinute) / 30);
 
-                // Get theme colors (do this inside as theme might change)
                 const defaultBorderColor = getThemeColor('--grid-border', '#e2e8f0');
 
                 const slotBlocks = container.querySelectorAll('.time-block');
-                if (slotBlocks.length === 0) return; // Nothing to update
+                if (slotBlocks.length === 0) return;
 
-                let passedActiveSlots = 0;
                 const activeStartSlotIndex = activeStartHour * SLOTS_PER_HOUR;
                 const activeEndSlotIndex = activeEndHour * SLOTS_PER_HOUR; // Exclusive end
 
-                let futureBlockCounter = 0; // For cycling future colors
+                let futureBlockCounter = 0;
 
                 slotBlocks.forEach(block => {
                     const slotIndex24 = parseInt(block.dataset.slotIndex24, 10);
-                    if (isNaN(slotIndex24)) return; // Skip if data attribute is missing or invalid
+                    if (isNaN(slotIndex24)) return;
 
-                    // Reset classes and styles first
+                    // Reset classes first
                     block.className = 'time-block'; // Base class only
+                    // Reset relevant styles (important if switching states)
                     block.style.background = '';
-                    block.style.borderColor = '';
+                    block.style.borderColor = ''; // Will be overridden by state classes
                     block.style.boxShadow = '';
                     block.style.opacity = '';
                     block.style.transform = '';
                     block.style.zIndex = '';
                     block.style.position = '';
+                    block.style.borderTopWidth = ''; // Reset active indicator
+                    block.style.borderTopColor = ''; // Reset active indicator
 
-                    // Apply state class
+                    // Determine if the slot is within active hours
+                    const isActiveHour = slotIndex24 >= activeStartSlotIndex && slotIndex24 < activeEndSlotIndex;
+
+                    // Apply state class (past, current, future)
                     if (slotIndex24 < currentSlotIndex24) {
                         block.classList.add('past');
                     } else if (slotIndex24 === currentSlotIndex24) {
@@ -994,37 +983,20 @@
                         const colorIndex = futureBlockCounter % futureColors.length;
                         const blockColor = futureColors[colorIndex];
                         block.style.background = blockColor;
-                        block.style.borderColor = defaultBorderColor; // Use default border for future
+                        // Future blocks use default border unless active
+                        block.style.borderColor = defaultBorderColor;
                         futureBlockCounter++;
                     }
 
-                    // Count passed slots *within the active range* for the active hours bar
-                    if (!isFullDayBar && slotIndex24 >= activeStartSlotIndex && slotIndex24 < activeEndSlotIndex) {
-                        if (slotIndex24 <= currentSlotIndex24) { // Count current slot as passed too
-                            passedActiveSlots++;
-                        }
+                    // Apply active hour class if applicable (adds the top border via CSS)
+                    if (isActiveHour) {
+                        block.classList.add('active-hour-slot');
                     }
                 });
 
-                // Update the count display for the active hours bar
-                if (!isFullDayBar && activeHoursCountSpan) {
-                    const totalActiveSlotsInCurrentRange = Math.max(0, (activeEndHour - activeStartHour) * SLOTS_PER_HOUR);
-                    // Ensure passed count doesn't exceed total
-                    passedActiveSlots = Math.min(passedActiveSlots, totalActiveSlotsInCurrentRange);
-                    activeHoursCountSpan.textContent = `(${passedActiveSlots}/${totalActiveSlotsInCurrentRange})`;
-                }
-
             } catch (error) {
-                console.error(`Error updating highlights (isFullDayBar: ${isFullDayBar}):`, error);
+                console.error(`Error updating full day highlights:`, error);
             }
-        }
-
-        function updateActiveHoursHighlight(currentTime) {
-            updateHighlightGeneric(activeHoursBarContainer, currentTime, false);
-        }
-
-        function updateFullDaySlotsHighlight(currentTime) {
-            updateHighlightGeneric(fullDaySlotsBarContainer, currentTime, true);
         }
 
 
@@ -1035,23 +1007,16 @@
 
                 const currentMinutes = now.getMinutes();
                 const currentSeconds = now.getSeconds();
-
-                // Calculate how many seconds *into* the current 30-min slot we are
                 const minutesIntoSlot = currentMinutes % 30;
                 const secondsIntoSlot = minutesIntoSlot * 60 + currentSeconds;
-
-                // Calculate remaining seconds
                 const totalSecondsInSlot = 30 * 60;
-                // Subtract 1 because the timer shows time *until* the next second ticks over
                 const secondsRemaining = Math.max(0, totalSecondsInSlot - secondsIntoSlot - 1);
 
                 slotTimerDisplay.textContent = formatTime(secondsRemaining);
 
-                // Calculate which slot index (0-47) we are in
                 const currentHour = now.getHours();
                 const currentTotalMinutes = currentHour * 60 + currentMinutes;
                 const currentSlotIndex = Math.floor(currentTotalMinutes / 30);
-                // Display is 1-based (e.g., "1 of 48")
                 slotsPassedDisplay.textContent = `${currentSlotIndex + 1} of ${TOTAL_DAY_SLOTS} slots passed`;
 
             } catch (error) {
@@ -1064,26 +1029,23 @@
         // --- Task History ---
         function logHistoryEvent(action, taskText) {
             try {
-                // Sanitize and truncate text
-                const textToLog = typeof taskText === 'string' ? taskText.substring(0, 100) : 'Invalid Text'; // Limit length
+                const textToLog = typeof taskText === 'string' ? taskText.substring(0, 100) : 'Invalid Text';
 
                 const event = {
-                    timestamp: new Date(), // Use current date/time
-                    action: action,        // e.g., 'added', 'completed', 'deleted'
+                    timestamp: new Date(),
+                    action: action,
                     taskText: textToLog
                 };
 
-                taskHistory.unshift(event); // Add to the beginning of the array
+                taskHistory.unshift(event);
 
-                // Limit history size (optional)
-                if (taskHistory.length > 100) { // Keep only the latest 100 events
-                    taskHistory.pop(); // Remove the oldest event
+                if (taskHistory.length > 100) {
+                    taskHistory.pop();
                 }
 
                 console.log("History event logged:", event);
-                saveState(); // Persist the updated history
+                saveState();
 
-                // Update UI immediately IF the history tab is currently visible
                 if (tabHistory && tabHistory.classList.contains('active')) {
                     renderHistory();
                 }
@@ -1098,59 +1060,51 @@
                 return;
             }
             try {
-                historyLogContainer.innerHTML = ''; // Clear previous entries
+                historyLogContainer.innerHTML = '';
 
                 if (taskHistory.length === 0) {
                     historyLogContainer.innerHTML = '<p class="text-muted italic text-center p-4">No history yet.</p>';
                     return;
                 }
 
-                const historyFragment = document.createDocumentFragment(); // More efficient for multiple appends
+                const historyFragment = document.createDocumentFragment();
 
                 taskHistory.forEach(event => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'history-entry';
 
-                    // Timestamp (right side)
                     const timestampSpan = document.createElement('span');
                     timestampSpan.className = 'history-timestamp';
-                    // Ensure timestamp is a Date object before formatting
                     timestampSpan.textContent = event.timestamp instanceof Date
                         ? event.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : 'Invalid Date';
 
-                    // Details (left side: Action + Text)
                     const detailsSpan = document.createElement('span');
-                    detailsSpan.className = 'history-details'; // Simple container
+                    detailsSpan.className = 'history-details';
 
-                    // Action (e.g., "Added:")
                     const actionSpan = document.createElement('span');
-                    // Sanitize action for class name (allow only letters/numbers)
                     const actionClass = String(event.action).replace(/[^a-z0-9]/gi, '').toLowerCase();
-                    actionSpan.className = `history-action history-action-${actionClass}`; // e.g., history-action-added
-                    actionSpan.textContent = `${event.action.charAt(0).toUpperCase() + event.action.slice(1)}: `; // Capitalize action
+                    actionSpan.className = `history-action history-action-${actionClass}`;
+                    actionSpan.textContent = `${event.action.charAt(0).toUpperCase() + event.action.slice(1)}: `;
 
-                    // Task Text
                     const textSpan = document.createElement('span');
                     textSpan.className = 'history-text';
                     textSpan.textContent = event.taskText;
 
-                    // Append Action and Text to Details
                     detailsSpan.appendChild(actionSpan);
                     detailsSpan.appendChild(textSpan);
 
-                    // Append Details and Timestamp to the main entry div
                     entryDiv.appendChild(detailsSpan);
                     entryDiv.appendChild(timestampSpan);
 
                     historyFragment.appendChild(entryDiv);
                 });
 
-                historyLogContainer.appendChild(historyFragment); // Append all entries at once
+                historyLogContainer.appendChild(historyFragment);
 
             } catch (error) {
                 console.error("Error rendering history:", error);
-                historyLogContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading history.</p>'; // Error message in UI
+                historyLogContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading history.</p>';
             }
         }
 
@@ -1162,61 +1116,55 @@
                 return;
             }
             try {
-                taskListContainer.innerHTML = ''; // Clear existing tasks
+                taskListContainer.innerHTML = '';
 
                 if (tasks.length === 0) {
                     taskListContainer.innerHTML = '<p class="text-muted italic text-center p-4">No tasks yet. Add one below or load a template!</p>';
                 } else {
-                    const taskFragment = document.createDocumentFragment(); // For efficiency
+                    const taskFragment = document.createDocumentFragment();
 
                     tasks.forEach(task => {
                         const taskElement = document.createElement('div');
                         taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
-                        taskElement.dataset.taskId = task.id; // Store task ID for easy access
+                        taskElement.dataset.taskId = task.id;
 
-                        // Label contains checkbox and text
                         const label = document.createElement('label');
 
-                        // Checkbox
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.checked = task.completed;
-                        checkbox.addEventListener('change', () => toggleTask(task.id)); // Use arrow function to pass ID
+                        checkbox.addEventListener('change', () => toggleTask(task.id));
 
-                        // Task Text
                         const taskText = document.createElement('span');
                         taskText.textContent = task.text;
 
                         label.appendChild(checkbox);
                         label.appendChild(taskText);
 
-                        // Delete Button
                         const deleteButton = document.createElement('button');
                         deleteButton.className = 'delete-button';
                         deleteButton.title = 'Delete Task';
-                        // Inline SVG for trash icon
                         deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
                         deleteButton.addEventListener('click', (e) => {
-                            e.stopPropagation(); // Prevent label click event if button is inside label
-                            deleteTask(task.id); // Use arrow function to pass ID
+                            e.stopPropagation();
+                            deleteTask(task.id);
                         });
 
-                        // Append label and button to the task item div
                         taskElement.appendChild(label);
                         taskElement.appendChild(deleteButton);
 
-                        taskFragment.appendChild(taskElement); // Add the task item to the fragment
+                        taskFragment.appendChild(taskElement);
                     });
 
-                    taskListContainer.appendChild(taskFragment); // Append all tasks at once
+                    taskListContainer.appendChild(taskFragment);
                 }
 
-                updateProgressBar(); // Update progress bar after rendering tasks
-                saveState(); // Save state whenever tasks are rendered (added, deleted, toggled)
+                updateProgressBar();
+                saveState();
 
             } catch (error) {
                 console.error("Error rendering tasks:", error);
-                taskListContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading tasks.</p>'; // Error message in UI
+                taskListContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading tasks.</p>';
             }
         }
 
@@ -1226,27 +1174,26 @@
                 console.error("Missing elements for addTask (input or container)");
                 return;
             }
-            const text = newTaskInput.value.trim(); // Get and trim input value
+            const text = newTaskInput.value.trim();
             console.log("Task text:", text);
 
-            if (text) { // Only add if text is not empty
+            if (text) {
                 try {
                     const newTask = {
-                        id: nextTaskId++, // Use current nextTaskId and then increment it
+                        id: nextTaskId++,
                         text: text,
-                        completed: false // New tasks start as incomplete
+                        completed: false
                     };
-                    tasks.push(newTask); // Add to the tasks array
-                    logHistoryEvent('added', text); // Log the addition
-                    newTaskInput.value = ''; // Clear the input field
-                    renderTasks(); // Re-render the task list UI
+                    tasks.push(newTask);
+                    logHistoryEvent('added', text);
+                    newTaskInput.value = '';
+                    renderTasks();
                 } catch (error) {
                     console.error("Error adding task:", error);
-                    alert("Failed to add task."); // User feedback
+                    alert("Failed to add task.");
                 }
             } else {
                 console.log("Task text is empty, not adding.");
-                // Optionally provide feedback: alert("Please enter task text.");
             }
         }
 
@@ -1255,23 +1202,21 @@
                 const taskIndex = tasks.findIndex(task => task.id === id);
                 if (taskIndex === -1) {
                     console.warn(`Task with id ${id} not found for toggling.`);
-                    return; // Exit if task not found
+                    return;
                 }
 
                 const task = tasks[taskIndex];
-                const originalText = task.text; // Get text before modification
+                const originalText = task.text;
                 const wasCompleted = task.completed;
 
-                // Toggle the completed status
                 tasks[taskIndex] = { ...task, completed: !wasCompleted };
 
-                // Log the correct action based on the *previous* state
                 logHistoryEvent(wasCompleted ? 'uncompleted' : 'completed', originalText);
 
-                renderTasks(); // Re-render the list to reflect the change
+                renderTasks();
             } catch(e) {
                 console.error(`Error toggling task with id ${id}:`, e);
-                alert("Failed to update task status."); // User feedback
+                alert("Failed to update task status.");
             }
         }
 
@@ -1280,26 +1225,25 @@
                 const taskIndex = tasks.findIndex(task => task.id === id);
                 if (taskIndex === -1) {
                     console.warn(`Task with id ${id} not found for deletion.`);
-                    return; // Exit if task not found
+                    return;
                 }
 
                 const taskToDelete = tasks[taskIndex];
-                logHistoryEvent('deleted', taskToDelete.text); // Log deletion before removing
+                logHistoryEvent('deleted', taskToDelete.text);
 
-                tasks.splice(taskIndex, 1); // Remove the task from the array
+                tasks.splice(taskIndex, 1);
 
-                renderTasks(); // Re-render the list
+                renderTasks();
             } catch(e) {
                 console.error(`Error deleting task with id ${id}:`, e);
-                alert("Failed to delete task."); // User feedback
+                alert("Failed to delete task.");
             }
         }
 
         // --- Progress Bar ---
         function updateProgressBar() {
             if (!progressBarInner || !progressPercentage) {
-                // console.warn("Progress bar elements not found."); // Can be noisy
-                return;
+                 return;
             }
             const completedTasks = tasks.filter(task => task.completed).length;
             const totalTasks = tasks.length;
@@ -1315,32 +1259,32 @@
             try {
                 // Add Task
                 if (addTaskButton) {
-                    addTaskButton.removeEventListener('click', addTask); // Prevent duplicates if run again
+                    addTaskButton.removeEventListener('click', addTask);
                     addTaskButton.addEventListener('click', addTask);
                 } else console.error("Add task button not found for listener.");
 
                 if (newTaskInput) {
-                    newTaskInput.removeEventListener('keypress', handleTaskInputKeypress); // Prevent duplicates
+                    newTaskInput.removeEventListener('keypress', handleTaskInputKeypress);
                     newTaskInput.addEventListener('keypress', handleTaskInputKeypress);
                 } else console.error("New task input not found for listener.");
 
                 // Load Template
                 if (loadTemplateButton) {
-                    loadTemplateButton.removeEventListener('click', loadTaskTemplate); // Prevent duplicates
+                    loadTemplateButton.removeEventListener('click', loadTaskTemplate);
                     loadTemplateButton.addEventListener('click', loadTaskTemplate);
                 } else console.error("Load template button not found for listener.");
 
                 // Tabs
                 if (tabTasks && tabHistory) {
-                    tabTasks.removeEventListener('click', showTasksTab); // Prevent duplicates
+                    tabTasks.removeEventListener('click', showTasksTab);
                     tabTasks.addEventListener('click', showTasksTab);
-                    tabHistory.removeEventListener('click', showHistoryTab); // Prevent duplicates
+                    tabHistory.removeEventListener('click', showHistoryTab);
                     tabHistory.addEventListener('click', showHistoryTab);
                 } else console.error("Tab elements not found for listeners.");
 
                 // Clear Tasks (Main Button in Task List)
                 if (clearTasksMainButton) {
-                    clearTasksMainButton.removeEventListener('click', clearAllTasks); // Prevent duplicates
+                    clearTasksMainButton.removeEventListener('click', clearAllTasks);
                     clearTasksMainButton.addEventListener('click', clearAllTasks);
                 } else console.error("Clear tasks main button not found for listener.");
 
@@ -1351,7 +1295,7 @@
                 if(closeSettingsButton) closeSettingsButton.addEventListener('click', closeSettingsModal);
                 else console.error("Close settings button not found for listener.");
 
-                if(settingsOverlay) settingsOverlay.addEventListener('click', closeSettingsModal); // Close on overlay click
+                if(settingsOverlay) settingsOverlay.addEventListener('click', closeSettingsModal);
                 else console.error("Settings overlay not found for listener.");
 
                 if(saveSettingsButton) saveSettingsButton.addEventListener('click', saveActiveHours);
@@ -1362,8 +1306,7 @@
 
                 // Clear History (Button inside Settings Modal)
                 if(clearHistoryButton) {
-                     // *** DEBUG LOGGING ADDED TO LISTENER ***
-                    clearHistoryButton.removeEventListener('click', clearHistory); // Prevent duplicates
+                    clearHistoryButton.removeEventListener('click', clearHistory);
                     clearHistoryButton.addEventListener('click', () => {
                         console.log("Clear History button (in settings) clicked!");
                         clearHistory();
@@ -1377,13 +1320,12 @@
                 if(confirmYesButton) confirmYesButton.addEventListener('click', handleConfirmYes);
                 else console.error("Confirm Yes button not found for listener.");
 
-                if(confirmOverlay) confirmOverlay.addEventListener('click', hideConfirmationModal); // Close on overlay click
+                if(confirmOverlay) confirmOverlay.addEventListener('click', hideConfirmationModal);
                 else console.error("Confirm overlay not found for listener.");
 
 
             } catch (error) {
                 console.error("Error setting up event listeners:", error);
-                // Consider showing an error to the user if setup fails critically
             }
             console.log("Event listeners setup finished.");
         }
@@ -1391,7 +1333,7 @@
         // Handler for Enter key in task input
         function handleTaskInputKeypress(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent default form submission if it were in a form
+                event.preventDefault();
                 addTask();
             }
         }
@@ -1411,7 +1353,7 @@
             historyLogContainer.classList.remove('hidden');
             tabTasks.classList.remove('active');
             tabHistory.classList.add('active');
-            renderHistory(); // Render history content when tab is activated
+            renderHistory();
         }
 
         // --- Initial Setup ---
@@ -1424,11 +1366,10 @@
 
             try {
                 console.log("Step 1: Selecting DOM elements...");
-                // Select ALL elements needed by the app upfront and check immediately
-                // Use a helper function or just list them with checks
+                // Define required IDs, excluding the removed active hours bar elements
                 const requiredIds = [
                     'date-display', 'time-display', 'slot-timer-display', 'slots-passed',
-                    'active-hours-bar', 'active-hours-count', 'active-hours-range-display',
+                    'active-hours-range-display-inline', // ADDED check for new inline display
                     'full-day-slots-bar', 'task-list-container', 'new-task-input',
                     'add-task-button', 'load-template-button', 'progress-bar-inner',
                     'progress-percentage', 'tab-tasks', 'tab-history', 'history-log-container',
@@ -1446,7 +1387,6 @@
                         missingElement = true;
                     }
                 });
-                 // Select theme buttons separately by class
                 themeButtons = document.querySelectorAll('.theme-button');
                 if (!themeButtons || themeButtons.length === 0) {
                      console.error("Critical Error: Elements with class '.theme-button' not found.");
@@ -1457,14 +1397,12 @@
                     throw new Error("One or more required HTML elements are missing. Cannot initialize app.");
                 }
 
-                // Assign elements to variables (only if all checks passed)
+                // Assign elements to variables
                 dateDisplay = document.getElementById('date-display');
                 timeDisplay = document.getElementById('time-display');
                 slotTimerDisplay = document.getElementById('slot-timer-display');
                 slotsPassedDisplay = document.getElementById('slots-passed');
-                activeHoursBarContainer = document.getElementById('active-hours-bar');
-                activeHoursCountSpan = document.getElementById('active-hours-count');
-                activeHoursRangeDisplay = document.getElementById('active-hours-range-display');
+                activeHoursRangeDisplayInline = document.getElementById('active-hours-range-display-inline'); // Assign new element
                 fullDaySlotsBarContainer = document.getElementById('full-day-slots-bar');
                 taskListContainer = document.getElementById('task-list-container');
                 newTaskInput = document.getElementById('new-task-input');
@@ -1496,20 +1434,20 @@
                 console.log("Step 1: Finished selecting DOM elements successfully.");
 
                 console.log("Step 2: Loading state...");
-                loadState(); // Loads theme, hours, tasks, history, template
+                loadState();
                 console.log("Step 2: Finished loading state.");
 
                 console.log("Step 3: Setting up theme switcher...");
-                setupThemeSwitcher(); // Applies loaded theme and sets up buttons
+                setupThemeSwitcher();
                 console.log("Step 3: Finished setting up theme switcher.");
 
                 console.log("Step 4: Generating time bars/grids...");
-                generateActiveHoursBar(); // Uses loaded active hours
+                // generateActiveHoursBar(); // REMOVED
                 generateFullDaySlotsBar();
                 console.log("Step 4: Finished generating time bars/grids.");
 
                 console.log("Step 5: Rendering initial tasks...");
-                renderTasks(); // Uses loaded tasks
+                renderTasks();
                 console.log("Step 5: Finished rendering initial tasks.");
 
                 console.log("Step 6: Setting up event listeners...");
@@ -1517,19 +1455,19 @@
                 console.log("Step 6: Finished setting up event listeners.");
 
                 console.log("Step 7: Performing initial date/time update and highlights...");
-                updateDateTime(); // First update to show current time/highlights
+                updateDateTime();
                 console.log("Step 7: Finished initial date/time update.");
 
                 console.log("Step 8: Setting up update interval...");
-                if (intervalId) clearInterval(intervalId); // Clear any previous interval
-                intervalId = setInterval(updateDateTime, 1000); // Update every second
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(updateDateTime, 1000);
                 console.log("Step 8: Finished setting up update interval.");
 
                 console.log("Step 9: Setting initial tab...");
-                showTasksTab(); // Start on the tasks tab
+                showTasksTab();
                 console.log("Step 9: Finished setting initial tab.");
 
-                // Ensure modals are hidden initially (might be visible if CSS defaults change)
+                // Ensure modals are hidden initially
                 if(settingsOverlay) settingsOverlay.classList.remove('visible');
                 if(settingsModal) settingsModal.classList.remove('visible');
                 if(confirmOverlay) confirmOverlay.classList.remove('visible');
@@ -1540,19 +1478,16 @@
 
             } catch(error) {
                 console.error("CRITICAL ERROR during app initialization:", error);
-                appInitialized = false; // Ensure flag is false on error
-                // Display a user-friendly error message covering the app area
+                appInitialized = false;
                 const body = document.querySelector('body');
                 if (body) {
                      body.innerHTML = `<div class="fixed inset-0 flex items-center justify-center bg-red-100 p-4"><div class="text-center"><h2 class="text-xl font-bold text-red-700 mb-2">Application Error</h2><p class="text-red-600">Could not load the Daily Dash app due to an internal error. Please check the developer console (F12) for details or try refreshing the page.</p><p class="text-sm text-red-500 mt-2">Error: ${error.message || 'Unknown error'}</p></div></div>`;
                 }
-                // Stop any intervals if they somehow started before the error
                 if (intervalId) clearInterval(intervalId);
             }
         }
 
         // --- Run Init ---
-        // Use DOMContentLoaded to ensure the HTML is parsed before running the script
         document.addEventListener('DOMContentLoaded', initializeApp);
 
         console.log("Script end.");
