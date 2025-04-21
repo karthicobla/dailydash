@@ -27,6 +27,8 @@
             /* Future colors are handled by JS cycling */
             --progress-bg: #e2e8f0; --progress-fill: #3b82f6;
             --button-add-bg: #22c55e; --button-add-hover: #16a34a;
+            --button-load-template-bg: #f97316; --button-load-template-hover: #ea580c; /* Orange for Load Template */
+            --button-danger-bg: #ef4444; --button-danger-hover: #dc2626; /* Red for destructive actions */
             --input-border: #cbd5e1; --input-focus-ring: #60a5fa;
             --theme-button-bg: #e2e8f0; --theme-button-hover: #cbd5e1;
             --theme-button-active: #3b82f6; --theme-button-icon: #334155;
@@ -37,6 +39,7 @@
             --modal-bg: var(--tile-bg); --modal-overlay-bg: rgba(0, 0, 0, 0.5);
             --button-secondary-bg: #e2e8f0; --button-secondary-hover: #cbd5e1; --button-secondary-text: #334155;
             --button-primary-bg: var(--primary-color); --button-primary-hover: var(--primary-accent); --button-primary-text: #ffffff;
+            --textarea-bg: var(--bg-color);
         }
         body[data-theme='grey'] {
              --bg-color: #e5e7eb; --text-color: #1f2937; --tile-bg: #f9fafb; --tile-shadow: rgba(0, 0, 0, 0.05);
@@ -45,12 +48,15 @@
             --grid-current-color-start: #9ca3af; --grid-current-color-end: #6b7280; --grid-current-border: #4b5563;
             --grid-past-color-start: #e5e7eb; --grid-past-color-end: #d1d5db; --grid-past-border: #d1d5db;
             --progress-bg: #d1d5db; --progress-fill: #6b7280; --button-add-bg: #52525b; --button-add-hover: #3f3f46;
+            --button-load-template-bg: #78716c; --button-load-template-hover: #57534e; /* Grey-Orange */
+            --button-danger-bg: #7f1d1d; --button-danger-hover: #b91c1c; /* Darker Red */
             --input-border: #d1d5db; --input-focus-ring: #9ca3af; --theme-button-bg: #d1d5db;
             --theme-button-hover: #9ca3af; --theme-button-active: #6b7280; --theme-button-icon: #374151;
             --task-hover-bg: #f3f4f6; --task-completed-bg: #e5e7eb;
             --tab-border: #d1d5db; --tab-active-border: var(--primary-color); --tab-text: var(--text-muted); --tab-active-text: var(--primary-color);
             --history-entry-border: #f3f4f6;
             --button-secondary-bg: #d1d5db; --button-secondary-hover: #9ca3af; --button-secondary-text: #1f2937;
+            --textarea-bg: var(--bg-color);
         }
         body[data-theme='dark'] {
             --bg-color: #111827; --text-color: #f9fafb; --tile-bg: #1f2937; --tile-shadow: rgba(0, 0, 0, 0.2);
@@ -59,6 +65,8 @@
             --grid-current-color-start: #93c5fd; --grid-current-color-end: #60a5fa; --grid-current-border: #bfdbfe;
             --grid-past-color-start: #374151; --grid-past-color-end: #4b5563; --grid-past-border: #6b7280;
             --progress-bg: #374151; --progress-fill: #60a5fa; --button-add-bg: #16a34a; --button-add-hover: #15803d;
+            --button-load-template-bg: #d97706; --button-load-template-hover: #b45309; /* Dark Orange */
+            --button-danger-bg: #b91c1c; --button-danger-hover: #991b1b; /* Darker Red */
             --input-border: #4b5563; --input-focus-ring: #60a5fa; --theme-button-bg: #374151;
             --theme-button-hover: #4b5563; --theme-button-active: #60a5fa; --theme-button-icon: #d1d5db;
             --task-hover-bg: #374151; --task-completed-bg: #111827;
@@ -68,11 +76,11 @@
             --modal-bg: var(--tile-bg); --modal-overlay-bg: rgba(0, 0, 0, 0.7);
             --button-secondary-bg: #374151; --button-secondary-hover: #4b5563; --button-secondary-text: #d1d5db;
             --button-primary-text: #111827;
+            --textarea-bg: #374151; /* Darker background for textarea in dark mode */
         }
 
         /* --- Component Styles --- */
         .main-title { color: var(--text-color); }
-        /* Style for the attribution link */
         .attribution-link a { color: var(--primary-color); text-decoration: none; }
         .attribution-link a:hover { text-decoration: underline; color: var(--primary-accent); }
 
@@ -83,24 +91,9 @@
         .text-primary-accent { color: var(--primary-accent); }
 
         /* Time Block Styles (Shared) */
-        .time-block {
-            border-radius: 3px; flex-shrink: 0;
-            transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
-            overflow: hidden;
-            border: 1px solid var(--grid-border);
-            /* No default background - JS or specific classes will set it */
-        }
-        .time-block.past {
-            background: linear-gradient(135deg, var(--grid-past-color-start), var(--grid-past-color-end)); /* Set background via CSS */
-            border-color: var(--grid-past-border);
-            opacity: 0.6; transform: scale(1); box-shadow: none; z-index: 1;
-        }
-        .time-block.current {
-            background: linear-gradient(135deg, var(--grid-current-color-start), var(--grid-current-color-end)); /* Set background via CSS */
-            border: 1px solid var(--grid-current-border); /* Set border via CSS */
-            box-shadow: 0 0 6px 1px var(--grid-current-border);
-            transform: scale(1.1); z-index: 10; position: relative; opacity: 1.0;
-        }
+        .time-block { border-radius: 3px; flex-shrink: 0; transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease; overflow: hidden; border: 1px solid var(--grid-border); }
+        .time-block.past { background: linear-gradient(135deg, var(--grid-past-color-start), var(--grid-past-color-end)); border-color: var(--grid-past-border); opacity: 0.6; transform: scale(1); box-shadow: none; z-index: 1; }
+        .time-block.current { background: linear-gradient(135deg, var(--grid-current-color-start), var(--grid-current-color-end)); border: 1px solid var(--grid-current-border); box-shadow: 0 0 6px 1px var(--grid-current-border); transform: scale(1.1); z-index: 10; position: relative; opacity: 1.0; }
         /* Future blocks get background set by JS */
 
         /* Active Hours Bar Specifics */
@@ -108,16 +101,16 @@
         .bar-container { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; }
 
         /* Full Day Slots Bar Specifics */
-        #full-day-slots-bar .time-block { width: 10px; height: 10px; } /* Smaller blocks */
-        #full-day-slots-bar { gap: 2px; margin-bottom: 1rem; } /* Tighter gap, add margin bottom */
+        #full-day-slots-bar .time-block { width: 10px; height: 10px; }
+        #full-day-slots-bar { gap: 2px; margin-bottom: 1rem; }
 
-        /* --- Other styles remain the same --- */
+        /* --- Other styles --- */
         .progress-bar-bg { background-color: var(--progress-bg); }
         .progress-bar-fill { background-color: var(--progress-fill); transition: width 0.5s ease-in-out, background-color 0.3s ease; }
-        .task-list-container::-webkit-scrollbar, .history-log-container::-webkit-scrollbar { width: 6px; }
-        .task-list-container::-webkit-scrollbar-track, .history-log-container::-webkit-scrollbar-track { background: var(--bg-color); }
-        .task-list-container::-webkit-scrollbar-thumb, .history-log-container::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
-        .task-list-container::-webkit-scrollbar-thumb:hover, .history-log-container::-webkit-scrollbar-thumb:hover { background: var(--text-color); }
+        .task-list-container::-webkit-scrollbar, .history-log-container::-webkit-scrollbar, .modal-textarea::-webkit-scrollbar { width: 6px; }
+        .task-list-container::-webkit-scrollbar-track, .history-log-container::-webkit-scrollbar-track, .modal-textarea::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 3px; }
+        .task-list-container::-webkit-scrollbar-thumb, .history-log-container::-webkit-scrollbar-thumb, .modal-textarea::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
+        .task-list-container::-webkit-scrollbar-thumb:hover, .history-log-container::-webkit-scrollbar-thumb:hover, .modal-textarea::-webkit-scrollbar-thumb:hover { background: var(--text-color); }
         .task-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--grid-border); transition: background-color 0.2s ease, opacity 0.3s ease; border-radius: 4px; }
         .task-item:last-child { border-bottom: none; }
         .task-item:hover { background-color: var(--task-hover-bg); }
@@ -133,15 +126,30 @@
         .add-task-container { margin-top: 1rem; display: flex; gap: 0.5rem; }
         .input-field { border: 1px solid var(--input-border); background-color: var(--tile-bg); color: var(--text-color); flex-grow: 1; border-radius: 0.375rem; padding: 0.6rem 0.75rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
         .input-field:focus { border-color: transparent; --tw-ring-color: var(--input-focus-ring); --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); outline: 2px solid transparent; outline-offset: 2px; }
-        .button-add { background-color: var(--button-add-bg); color: #fff; transition: background-color 0.2s ease; font-weight: 500; padding: 0.6rem 1rem; border-radius: 0.375rem; display: inline-flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+        /* Base Button Style */
+        .button-base { color: #fff; transition: background-color 0.2s ease; font-weight: 500; padding: 0.6rem 1rem; border-radius: 0.375rem; display: inline-flex; align-items: center; gap: 0.25rem; flex-shrink: 0; border: none; cursor: pointer; }
+        .button-add { background-color: var(--button-add-bg); }
         .button-add:hover { background-color: var(--button-add-hover); }
-        .button-add svg { /* SVG already inline */ }
+        .button-load-template { background-color: var(--button-load-template-bg); }
+        .button-load-template:hover { background-color: var(--button-load-template-hover); }
+        .button-danger { background-color: var(--button-danger-bg); color: #fff; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; }
+        .button-danger:hover { background-color: var(--button-danger-hover); }
+        /* Small Danger Button for Clear Tasks in main view */
+        .button-danger-small { background-color: var(--button-danger-bg); color: #fff; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; /* Smaller text */ line-height: 1; transition: background-color 0.2s ease; border: none; cursor: pointer; }
+        .button-danger-small:hover { background-color: var(--button-danger-hover); }
+
+        .button-add svg, .button-load-template svg { /* SVG already inline */ }
         .theme-switcher { background-color: var(--tile-bg); border-radius: 0.5rem; padding: 0.5rem; box-shadow: 0 2px 4px -1px var(--tile-shadow); margin-bottom: 1.5rem; }
-        .theme-button { background-color: var(--theme-button-bg); border-radius: 0.375rem; padding: 0.5rem; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; border: 2px solid transparent; }
+        .theme-button { background-color: var(--theme-button-bg); border-radius: 0.375rem; padding: 0.5rem; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; border: 2px solid transparent; /* Keep transparent border for layout consistency */ }
         .theme-button:hover { background-color: var(--theme-button-hover); }
-        .theme-button.active { border-color: var(--theme-button-active); box-shadow: 0 0 0 2px var(--theme-button-active); }
+        /* --- MODIFIED RULE --- */
+        .theme-button.active {
+            /* border-color: var(--theme-button-active); /* Removed */
+            /* box-shadow: 0 0 0 2px var(--theme-button-active); /* Removed */
+            /* Active state is now indicated only by the icon color change below */
+        }
         .theme-button svg { color: var(--theme-button-icon); transition: color 0.3s ease; width: 20px; height: 20px; display: block; }
-        .theme-button.active svg { color: var(--theme-button-active); }
+        .theme-button.active svg { color: var(--theme-button-active); } /* This rule makes the icon color change */
         .datetime-icon { color: var(--primary-color); flex-shrink: 0; width:20px; height:20px; }
         .tab-container { border-bottom: 1px solid var(--tab-border); margin-bottom: 1rem; }
         .tab-button { padding: 0.5rem 1rem; margin-bottom: -1px; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--tab-text); font-weight: 500; transition: color 0.2s ease, border-color 0.2s ease; }
@@ -154,18 +162,34 @@
         .history-action { font-weight: 500; }
         .history-action-added { color: var(--button-add-bg); } .history-action-completed { color: var(--primary-color); }
         .history-action-uncompleted { color: var(--text-muted); } .history-action-deleted { color: var(--task-delete-icon-hover-color); }
+        .history-action-template { color: var(--button-load-template-bg); } /* Style for template load */
+        .history-action-cleared { color: var(--button-danger-bg); } /* Style for clear actions */
         .history-text { color: var(--text-color); word-break: break-word; }
-        .modal-overlay { position: fixed; inset: 0; background-color: var(--modal-overlay-bg); z-index: 40; transition: opacity 0.3s ease-in-out; opacity: 1; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--modal-bg); color: var(--text-color); padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); width: 90%; max-width: 400px; z-index: 50; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; opacity: 1; }
-        .modal.hidden, .modal-overlay.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -45%); }
+
+        /* Modal Styles (Shared) */
+        .modal-overlay { position: fixed; inset: 0; background-color: var(--modal-overlay-bg); z-index: 40; transition: opacity 0.3s ease-in-out; opacity: 0; pointer-events: none; }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background-color: var(--modal-bg); color: var(--text-color); padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); width: 90%; max-width: 500px; /* Added max-width */ z-index: 50; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; opacity: 0; pointer-events: none; }
+        .modal.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
         .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
         .modal-label { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
         .modal-select { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.375rem; border: 1px solid var(--input-border); background-color: var(--bg-color); color: var(--text-color); margin-bottom: 1rem; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
+        /* Textarea for Template */
+        .modal-textarea { width: 100%; min-height: 100px; padding: 0.5rem 0.75rem; border-radius: 0.375rem; border: 1px solid var(--input-border); background-color: var(--textarea-bg); color: var(--text-color); margin-bottom: 0.5rem; font-size: 0.875rem; line-height: 1.4; resize: vertical; overflow-y: auto; /* Add scrollbar */ }
+        .modal-textarea:focus { border-color: transparent; --tw-ring-color: var(--input-focus-ring); --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); outline: 2px solid transparent; outline-offset: 2px; }
+        .modal-section { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--grid-border); }
+        .modal-section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-color); }
         .modal-buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
-        .button-secondary { background-color: var(--button-secondary-bg); color: var(--button-secondary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; }
+        .modal-danger-zone { display: flex; justify-content: center; /* Center the remaining button */ gap: 0.5rem; margin-top: 1rem; }
+        .button-secondary { background-color: var(--button-secondary-bg); color: var(--button-secondary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; border: none; cursor: pointer; }
         .button-secondary:hover { background-color: var(--button-secondary-hover); }
-        .button-primary { background-color: var(--button-primary-bg); color: var(--button-primary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; }
+        .button-primary { background-color: var(--button-primary-bg); color: var(--button-primary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; border: none; cursor: pointer; }
         .button-primary:hover { background-color: var(--button-primary-hover); }
+
+        /* Confirmation Modal Specific Styles */
+        #confirm-modal { max-width: 400px; /* Smaller width */ }
+        #confirm-message { margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.5; }
+
         #settings-button { position: fixed; top: 1rem; left: 1rem; z-index: 30; background-color: var(--tile-bg); color: var(--text-muted); padding: 0.5rem; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; border: 1px solid var(--grid-border); }
         #settings-button:hover { background-color: var(--theme-button-hover); color: var(--text-color); }
         #settings-button svg { display: block; width: 20px; height: 20px; }
@@ -174,19 +198,79 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <button id="settings-button" title="Settings"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> </button>
-    <div id="settings-overlay" class="modal-overlay hidden"></div>
-    <div id="settings-modal" class="modal hidden"> <h2 class="modal-title">Settings</h2> <div class="space-y-4"> <div> <label for="setting-start-hour" class="modal-label">Active Hours Start (0-23)</label> <select id="setting-start-hour" class="modal-select"></select> </div> <div> <label for="setting-end-hour" class="modal-label">Active Hours End (1-24)</label> <select id="setting-end-hour" class="modal-select"></select> </div> </div> <div class="modal-buttons"> <button id="close-settings-button" class="button-secondary">Close</button> <button id="save-settings-button" class="button-primary">Save</button> </div> </div>
+    <button id="settings-button" title="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </button>
+
+    <div id="settings-overlay" class="modal-overlay"></div>
+    <div id="settings-modal" class="modal">
+        <h2 class="modal-title">Settings</h2>
+
+        <div class="space-y-4">
+            <h3 class="modal-section-title">Active Hours</h3>
+            <div>
+                <label for="setting-start-hour" class="modal-label">Start</label>
+                <select id="setting-start-hour" class="modal-select"></select>
+            </div>
+            <div>
+                <label for="setting-end-hour" class="modal-label">End</label>
+                <select id="setting-end-hour" class="modal-select"></select>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3 class="modal-section-title">Daily Task Template</h3>
+            <div>
+                <label for="setting-task-template" class="modal-label">Define (one task per line)</label>
+                <textarea id="setting-task-template" class="modal-textarea" placeholder="e.g.&#10;Review daily goals&#10;Check email&#10;Team meeting"></textarea>
+                <button id="save-template-button" class="button-primary mt-2 text-sm py-1 px-3">Save Template</button>
+                <p class="text-xs text-muted mt-1">Load template using the 'Load' button in the task list.</p>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h3 class="modal-section-title text-red-600">Danger Zone</h3>
+            <div class="modal-danger-zone">
+                <button id="clear-history-button" class="button-danger text-sm">Clear History</button>
+            </div>
+            <p class="text-xs text-muted mt-1">This action cannot be undone.</p>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="close-settings-button" class="button-secondary">Close</button>
+            <button id="save-settings-button" class="button-primary">Save</button>
+        </div>
+    </div>
+
+    <div id="confirm-overlay" class="modal-overlay"></div>
+    <div id="confirm-modal" class="modal">
+        <p id="confirm-message" class="text-center">Are you sure?</p>
+        <div class="modal-buttons">
+            <button id="confirm-no-button" class="button-secondary">Cancel</button>
+            <button id="confirm-yes-button" class="button-danger">Yes, Proceed</button>
+        </div>
+    </div>
 
     <h1 class="main-title text-4xl md:text-5xl font-bold text-center mb-1">Daily Dash</h1>
     <p class="text-center text-sm text-muted mb-6 attribution-link">
         by <a href="https://www.linkedin.com/in/karthicobla/" target="_blank" rel="noopener noreferrer">Karthic</a>
     </p>
 
-    <div class="theme-switcher max-w-xs mx-auto"> <div class="flex justify-center gap-3"> <button class="theme-button" data-theme-value="light" title="Light"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg> </button> <button class="theme-button" data-theme-value="grey" title="Grey"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg> </button> <button class="theme-button" data-theme-value="dark" title="Dark"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg> </button> </div> </div>
+    <div class="theme-switcher max-w-xs mx-auto">
+        <div class="flex justify-center gap-3">
+            <button class="theme-button" data-theme-value="light" title="Light">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+            </button>
+            <button class="theme-button" data-theme-value="grey" title="Grey">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+            </button>
+            <button class="theme-button" data-theme-value="dark" title="Dark">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+            </button>
+        </div>
+    </div>
 
     <div class="max-w-6xl mx-auto space-y-6">
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <div class="tile p-6 rounded-lg flex flex-col items-center justify-center text-center space-y-3">
@@ -213,8 +297,8 @@
                 <h3 class="tile-title text-sm font-semibold mb-1 text-center md:text-left">Full Day Slots (00:00 - 24:00)</h3>
                 <div id="full-day-slots-bar" class="bar-container justify-center md:justify-start">
                     </div>
-
-                <div class="mt-4"> <div class="flex justify-between items-center mb-1">
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-1">
                         <h3 class="tile-title text-lg font-semibold">Active Hours (<span id="active-hours-range-display"></span>)</h3>
                         <span id="active-hours-count" class="text-sm text-muted">(0/0)</span>
                     </div>
@@ -222,15 +306,21 @@
                         </div>
                 </div>
             </div>
+        </div>
 
-        </div> <div class="tile p-6 rounded-lg">
+        <div class="tile p-6 rounded-lg">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="tile-title text-xl font-semibold">Task Checklist</h2>
+                <button id="clear-tasks-main-button" class="button-danger-small" title="Clear All Tasks">
+                    Clear All
+                </button>
             </div>
+
             <div class="tab-container">
                 <button id="tab-tasks" class="tab-button active">Tasks</button>
                 <button id="tab-history" class="tab-button">History</button>
             </div>
+
             <div class="mb-4">
                 <div class="flex justify-between mb-1">
                     <span class="text-sm font-medium text-primary-accent">Progress</span>
@@ -240,45 +330,61 @@
                     <div id="progress-bar-inner" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
+
             <div id="task-list-container" class="space-y-1 max-h-60 overflow-y-auto pr-2 task-list-container">
                 <p class="text-muted italic text-center p-4">Loading tasks...</p>
-            </div>
+                </div>
+
             <div id="history-log-container" class="hidden space-y-1 max-h-60 overflow-y-auto pr-2 history-log-container">
                 <p class="text-muted italic text-center p-4">No history yet.</p>
-            </div>
+                </div>
+
             <div class="add-task-container">
                 <input type="text" id="new-task-input" placeholder="Add a new task..." class="input-field">
-                <button id="add-task-button" class="button-add">
+                <button id="load-template-button" class="button-base button-load-template" title="Load tasks from template">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>
+                    Load
+                </button>
+                <button id="add-task-button" class="button-base button-add">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Add
                 </button>
             </div>
-        </div> </div> <script>
+        </div>
+    </div>
+
+    <script>
         console.log("Script start.");
         let appInitialized = false;
 
         // --- DOM Elements ---
+        // Declare all element variables here
         let dateDisplay, timeDisplay, slotTimerDisplay, slotsPassedDisplay,
             activeHoursBarContainer, activeHoursCountSpan, activeHoursRangeDisplay,
-            fullDaySlotsBarContainer, // New element for full day grid
-            taskListContainer, newTaskInput, addTaskButton,
+            fullDaySlotsBarContainer,
+            taskListContainer, newTaskInput, addTaskButton, loadTemplateButton,
             progressBarInner, progressPercentage,
             themeButtons, tabTasks, tabHistory, historyLogContainer,
             settingsButton, settingsModal, settingsOverlay,
-            startHourSelect, endHourSelect, saveSettingsButton, closeSettingsButton;
+            startHourSelect, endHourSelect, saveSettingsButton, closeSettingsButton,
+            taskTemplateTextarea, saveTemplateButton,
+            clearTasksMainButton,
+            clearHistoryButton,
+            confirmModal, confirmOverlay, confirmMessage, confirmYesButton, confirmNoButton;
 
         // --- State Variables ---
-        let tasks = []; // Loaded from localStorage or default
-        let nextTaskId = 1; // Loaded from localStorage or default
-        let taskHistory = []; // Loaded from localStorage or default
+        let tasks = [];
+        let nextTaskId = 1;
+        let taskHistory = [];
+        let taskTemplate = "";
         const DEFAULT_THEME = 'light';
-        let activeStartHour = 6; // Default, loaded from localStorage
-        let activeEndHour = 21; // Default, loaded from localStorage
+        let activeStartHour = 6;
+        let activeEndHour = 21;
         const SLOTS_PER_HOUR = 2;
-        const TOTAL_DAY_SLOTS = 24 * SLOTS_PER_HOUR; // 48 slots
+        const TOTAL_DAY_SLOTS = 24 * SLOTS_PER_HOUR;
         let intervalId = null;
-        // Color sequence for future blocks
-        const futureColors = ['#fde047', '#f59e0b', '#ef4444', '#ec4899', '#a855f7', '#60a5fa', '#2dd4bf', '#84cc16']; // Yellow -> Amber -> Red -> Pink -> Purple -> Blue -> Teal -> Lime
+        const futureColors = ['#fde047', '#f59e0b', '#ef4444', '#ec4899', '#a855f7', '#60a5fa', '#2dd4bf', '#84cc16'];
+        let currentConfirmCallback = null; // To store the function to run on confirmation
 
         // --- LocalStorage Keys ---
         const LS_TASKS_KEY = 'timebox-tasks';
@@ -287,247 +393,588 @@
         const LS_THEME_KEY = 'timebox-theme';
         const LS_START_HOUR_KEY = 'timebox-activeStartHour';
         const LS_END_HOUR_KEY = 'timebox-activeEndHour';
+        const LS_TEMPLATE_KEY = 'timebox-taskTemplate';
 
         // --- Utility Functions ---
-        function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "--:--"; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`; }
-        function getThemeColor(variableName, fallbackColor = '#888888') { try { if (document.body) { const color = getComputedStyle(document.body).getPropertyValue(variableName).trim(); return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor; } const rootStyle = getComputedStyle(document.documentElement); const color = rootStyle.getPropertyValue(variableName).trim(); return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor; } catch (e) { console.warn(`Error getting theme color ${variableName}:`, e); return fallbackColor; } }
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return "--:--";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function getThemeColor(variableName, fallbackColor = '#888888') {
+            try {
+                // Prefer body style if available, otherwise use root
+                if (document.body) {
+                    const color = getComputedStyle(document.body).getPropertyValue(variableName).trim();
+                    // Basic validation: Check if it starts like a color value
+                    return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor;
+                }
+                // Fallback to root element (might happen early in load or if body isn't styled yet)
+                const rootStyle = getComputedStyle(document.documentElement);
+                const color = rootStyle.getPropertyValue(variableName).trim();
+                return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor;
+            } catch (e) {
+                console.warn(`Error getting theme color ${variableName}:`, e);
+                return fallbackColor;
+            }
+        }
 
         // --- Persistence (LocalStorage) ---
         function loadState() {
             console.log("Loading state from localStorage...");
             try {
-                // Load Theme
+                // Theme
                 const savedTheme = localStorage.getItem(LS_THEME_KEY);
                 const validThemes = ['light', 'grey', 'dark'];
                 const themeToApply = validThemes.includes(savedTheme) ? savedTheme : DEFAULT_THEME;
                 applyTheme(themeToApply); // Apply theme early
-                console.log(`Theme loaded: ${themeToApply}`);
 
-                // Load Active Hours
+                // Active Hours
                 const savedStart = localStorage.getItem(LS_START_HOUR_KEY);
                 const savedEnd = localStorage.getItem(LS_END_HOUR_KEY);
                 if (savedStart !== null) activeStartHour = parseInt(savedStart, 10);
                 if (savedEnd !== null) activeEndHour = parseInt(savedEnd, 10);
-                console.log("Active hours loaded:", activeStartHour, activeEndHour);
 
-                // Load Tasks
+                // Tasks
                 const savedTasks = localStorage.getItem(LS_TASKS_KEY);
                 if (savedTasks) {
                     tasks = JSON.parse(savedTasks);
-                    console.log(`Tasks loaded: ${tasks.length} items`);
                 } else {
-                    // Default tasks if nothing is saved
-                    tasks = [ { id: 1, text: 'Plan Your Day', completed: true }, { id: 2, text: 'Check and Respond to emails', completed: false }, { id: 3, text: 'Work on project X', completed: false }, { id: 4, text: 'Review Pending Items', completed: false }, ];
-                    console.log("Using default tasks.");
+                    // Default tasks if none saved
+                    tasks = [
+                        { id: 1, text: 'Plan Your Day', completed: true },
+                        { id: 2, text: 'Check and Respond to emails', completed: false },
+                        { id: 3, text: 'Work on project X', completed: false },
+                        { id: 4, text: 'Review Pending Items', completed: false },
+                    ];
                 }
 
-                // Load Next Task ID
+                // Next Task ID
                 const savedNextId = localStorage.getItem(LS_NEXT_ID_KEY);
                 if (savedNextId) {
                     nextTaskId = parseInt(savedNextId, 10);
-                     console.log(`Next Task ID loaded: ${nextTaskId}`);
                 } else {
-                    // Calculate next ID based on loaded tasks if not saved
+                    // Calculate next ID based on loaded tasks
                     nextTaskId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-                    console.log(`Calculated Next Task ID: ${nextTaskId}`);
                 }
 
-
-                // Load History
+                // History
                 const savedHistory = localStorage.getItem(LS_HISTORY_KEY);
                 if (savedHistory) {
-                    // Need to parse dates correctly
+                    // Parse dates correctly
                     taskHistory = JSON.parse(savedHistory).map(event => ({
                         ...event,
                         timestamp: new Date(event.timestamp) // Convert string back to Date object
                     }));
-                    console.log(`History loaded: ${taskHistory.length} events`);
                 } else {
                     taskHistory = [];
-                    console.log("No history found.");
                 }
 
+                 // Task Template
+                const savedTemplate = localStorage.getItem(LS_TEMPLATE_KEY);
+                if (savedTemplate) {
+                    taskTemplate = savedTemplate;
+                } else {
+                    // Default template
+                    taskTemplate = "Review daily goals\nCheck email\nTeam meeting\nLunch break\nFocus work block\nWrap up day";
+                }
+
+
+                console.log("State loaded.");
             } catch (e) {
                 console.error("Could not load state from localStorage:", e);
-                // Use defaults if loading fails
-                tasks = [ { id: 1, text: 'Plan morning tasks', completed: true }, { id: 2, text: 'Check emails', completed: false }, { id: 3, text: 'Work on project X', completed: false }, { id: 4, text: 'Lunch break', completed: false }, ];
+                // Reset to defaults on error
+                tasks = [
+                    { id: 1, text: 'Plan morning tasks', completed: true },
+                    { id: 2, text: 'Check emails', completed: false },
+                    { id: 3, text: 'Work on project X', completed: false },
+                    { id: 4, text: 'Lunch break', completed: false },
+                ];
                 taskHistory = [];
                 nextTaskId = 5;
                 activeStartHour = 6;
                 activeEndHour = 21;
-                applyTheme(DEFAULT_THEME);
+                taskTemplate = "Default task 1\nDefault task 2";
+                applyTheme(DEFAULT_THEME); // Apply default theme on error
             }
-            populateHourSelects(); // Populate selects after loading active hours
-            updateActiveHoursDisplay(); // Update display after loading
+            // Populate UI elements that depend on loaded state *after* loading
+            populateHourSelects();
+            updateActiveHoursDisplay();
         }
 
         function saveState() {
             console.log("Saving state to localStorage...");
             try {
                 localStorage.setItem(LS_TASKS_KEY, JSON.stringify(tasks));
-                localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(taskHistory)); // Dates are saved as strings
+                localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(taskHistory));
                 localStorage.setItem(LS_NEXT_ID_KEY, nextTaskId.toString());
-                // Theme and Active Hours are saved separately in their respective functions
+                localStorage.setItem(LS_TEMPLATE_KEY, taskTemplate);
+                // Theme and hours are saved separately when changed
                 console.log("State saved.");
             } catch (e) {
                 console.error("Could not save state to localStorage:", e);
+                // Optionally alert the user or implement more robust error handling
             }
         }
 
 
+        // --- Confirmation Modal Logic ---
+        function showConfirmationModal(message, onConfirm) {
+            // *** DEBUG LOGGING ADDED ***
+            console.log("Attempting to show confirmation modal...");
+            console.log("Confirm Modal Element:", confirmModal);
+            console.log("Confirm Overlay Element:", confirmOverlay);
+            console.log("Confirm Message Element:", confirmMessage);
+
+            if (!confirmModal || !confirmOverlay || !confirmMessage) {
+                console.error("Confirmation modal elements not found!");
+                // Provide a basic browser confirm as a fallback
+                if (confirm("Fallback: " + message)) {
+                    if (typeof onConfirm === 'function') {
+                         try { onConfirm(); } catch (e) { console.error("Error in fallback confirm callback:", e); }
+                    }
+                }
+                return;
+            }
+
+            console.log("Setting confirmation message:", message);
+            confirmMessage.textContent = message;
+            currentConfirmCallback = onConfirm; // Store the function to call on 'Yes'
+            console.log("Assigning callback:", currentConfirmCallback);
+
+            console.log("Adding 'visible' class to overlay...");
+            confirmOverlay.classList.add('visible');
+            console.log("Adding 'visible' class to modal...");
+            confirmModal.classList.add('visible');
+            console.log("Confirmation modal should now be visible.");
+        }
+
+        function hideConfirmationModal() {
+            if (!confirmModal || !confirmOverlay) return;
+            console.log("Hiding confirmation modal.");
+            confirmOverlay.classList.remove('visible');
+            confirmModal.classList.remove('visible');
+            currentConfirmCallback = null; // Clear the stored callback
+        }
+
+        function handleConfirmYes() {
+            console.log("handleConfirmYes function called.");
+            console.log("Type of currentConfirmCallback:", typeof currentConfirmCallback);
+            console.log("Value of currentConfirmCallback:", currentConfirmCallback);
+
+            if (typeof currentConfirmCallback === 'function') {
+                console.log("Executing confirmation callback.");
+                try {
+                    currentConfirmCallback(); // Execute the stored action
+                } catch (error) {
+                    console.error("Error executing confirmation callback:", error);
+                    alert("An error occurred while performing the action."); // User feedback
+                }
+            } else {
+                 console.warn("No confirmation callback stored or it's not a function.");
+            }
+            hideConfirmationModal(); // Hide modal AFTER executing (or attempting to execute) callback
+        }
+
         // --- Settings Modal Logic ---
-        function openSettingsModal() { if (!settingsModal || !settingsOverlay || !startHourSelect || !endHourSelect) return; startHourSelect.value = activeStartHour; endHourSelect.value = activeEndHour; settingsModal.classList.remove('hidden'); settingsOverlay.classList.remove('hidden'); }
-        function closeSettingsModal() { if (!settingsModal || !settingsOverlay) return; settingsModal.classList.add('hidden'); settingsOverlay.classList.add('hidden'); }
-        function saveSettings() {
+        function openSettingsModal() {
+            if (!settingsModal || !settingsOverlay || !startHourSelect || !endHourSelect || !taskTemplateTextarea) {
+                console.error("Cannot open settings: one or more modal elements missing.");
+                return;
+            }
+            // Populate with current settings
+            startHourSelect.value = activeStartHour;
+            endHourSelect.value = activeEndHour;
+            taskTemplateTextarea.value = taskTemplate;
+            // Make visible
+            settingsOverlay.classList.add('visible');
+            settingsModal.classList.add('visible');
+            console.log("Settings modal opened.");
+        }
+
+        function closeSettingsModal() {
+            if (!settingsModal || !settingsOverlay) return;
+            settingsOverlay.classList.remove('visible');
+            settingsModal.classList.remove('visible');
+            console.log("Settings modal closed.");
+        }
+
+        function saveActiveHours() {
             if (!startHourSelect || !endHourSelect) return;
             const newStart = parseInt(startHourSelect.value, 10);
             const newEnd = parseInt(endHourSelect.value, 10);
+
             if (isNaN(newStart) || isNaN(newEnd) || newStart >= newEnd) {
-                // Use a more user-friendly alert or modal later
                 alert("Invalid hour selection. Start hour must be before end hour.");
                 return;
             }
+
             activeStartHour = newStart;
             activeEndHour = newEnd;
+
+            // Save to localStorage
             try {
                 localStorage.setItem(LS_START_HOUR_KEY, activeStartHour);
                 localStorage.setItem(LS_END_HOUR_KEY, activeEndHour);
-                console.log("Active hours saved:", activeStartHour, activeEndHour);
-            } catch (e) { console.error("Could not save active hours to localStorage:", e); }
+                console.log("Active hours saved to localStorage:", activeStartHour, activeEndHour);
+            } catch (e) {
+                console.error("Could not save active hours to localStorage:", e);
+                alert("Error saving hours settings."); // User feedback
+            }
+
+            // Update UI immediately
             updateActiveHoursDisplay();
-            generateActiveHoursBar(); // Regenerate bar with new range
-            updateDateTime(); // Update highlights immediately
-            closeSettingsModal();
+            generateActiveHoursBar(); // Regenerate the bar based on new hours
+            updateDateTime(); // Force immediate update of highlights
+
+            alert("Active hours saved!"); // User feedback
+            // Optionally close the modal after saving hours: closeSettingsModal();
         }
-        // loadSettings is now part of loadState()
-        function populateHourSelects() { if (!startHourSelect || !endHourSelect) { console.error("Hour select elements not found for population"); return; } startHourSelect.innerHTML = ''; endHourSelect.innerHTML = ''; for (let i = 0; i < 24; i++) { const startOption = document.createElement('option'); startOption.value = i; startOption.textContent = `${String(i).padStart(2, '0')}:00`; startHourSelect.appendChild(startOption); const endOption = document.createElement('option'); endOption.value = i + 1; endOption.textContent = `${String(i + 1).padStart(2, '0')}:00`; endHourSelect.appendChild(endOption); } }
-        function formatHourForDisplay(hour) { if (hour === 0 || hour === 24) return '12a'; if (hour === 12) return '12p'; if (hour < 12) return `${hour}a`; return `${hour - 12}p`; }
-        function updateActiveHoursDisplay() { if (!activeHoursRangeDisplay) { console.error("activeHoursRangeDisplay element not found"); return; } activeHoursRangeDisplay.textContent = `${formatHourForDisplay(activeStartHour)}-${formatHourForDisplay(activeEndHour)}`; }
+
+        function populateHourSelects() {
+            if (!startHourSelect || !endHourSelect) {
+                console.error("Hour select elements not found for population.");
+                return;
+            }
+            startHourSelect.innerHTML = ''; // Clear existing options
+            endHourSelect.innerHTML = '';
+
+            for (let i = 0; i < 24; i++) {
+                // Start Hour options (00:00 to 23:00)
+                const startOption = document.createElement('option');
+                startOption.value = i;
+                startOption.textContent = `${String(i).padStart(2, '0')}:00`;
+                startHourSelect.appendChild(startOption);
+
+                // End Hour options (01:00 to 24:00)
+                const endOption = document.createElement('option');
+                endOption.value = i + 1; // End hour is exclusive, so value is the start of the *next* hour
+                endOption.textContent = `${String(i + 1).padStart(2, '0')}:00`;
+                endHourSelect.appendChild(endOption);
+            }
+        }
+
+        function formatHourForDisplay(hour) {
+            if (hour === 0 || hour === 24) return '12a'; // Midnight/End of Day
+            if (hour === 12) return '12p'; // Noon
+            if (hour < 12) return `${hour}a`; // AM
+            return `${hour - 12}p`; // PM
+        }
+
+        function updateActiveHoursDisplay() {
+            if (!activeHoursRangeDisplay) {
+                console.error("activeHoursRangeDisplay element not found");
+                return;
+            }
+            activeHoursRangeDisplay.textContent = `${formatHourForDisplay(activeStartHour)}-${formatHourForDisplay(activeEndHour)}`;
+        }
+
+
+        // --- Task Template Logic ---
+        function saveTaskTemplate() {
+            if (!taskTemplateTextarea) return;
+            taskTemplate = taskTemplateTextarea.value; // Get current value from textarea
+            try {
+                localStorage.setItem(LS_TEMPLATE_KEY, taskTemplate);
+                console.log("Task template saved to localStorage.");
+                alert("Task template saved successfully!"); // User feedback
+            } catch (e) {
+                console.error("Could not save task template to localStorage:", e);
+                alert("Error saving task template."); // User feedback
+            }
+        }
+
+        function loadTaskTemplate() {
+            console.log("loadTaskTemplate function called.");
+            if (!taskTemplate) {
+                console.log("No task template found in state.");
+                alert("No task template saved yet. Define one in Settings.");
+                return;
+            }
+            console.log("Current task template:", taskTemplate);
+
+            // Use the custom confirmation modal
+            showConfirmationModal(
+                "This will replace your current tasks with the template. Are you sure?",
+                () => { // Callback function if user confirms
+                    console.log("Load template confirmed by user via custom modal.");
+                    try {
+                        const templateLines = taskTemplate.split('\n')
+                            .map(line => line.trim()) // Remove whitespace
+                            .filter(line => line.length > 0); // Remove empty lines
+
+                        console.log("Parsed template lines:", templateLines);
+
+                        if (templateLines.length === 0) {
+                            console.log("Template is empty after parsing.");
+                            alert("Template is empty or contains only whitespace.");
+                            return; // Don't clear tasks if template is effectively empty
+                        }
+
+                        // Clear existing tasks and reset ID counter
+                        tasks = [];
+                        nextTaskId = 1; // Reset ID for the new list
+                        console.log("Cleared tasks array, resetting nextTaskId to 1.");
+
+                        // Add tasks from template
+                        templateLines.forEach(line => {
+                            const newTask = {
+                                id: nextTaskId++,
+                                text: line,
+                                completed: false // New tasks start as incomplete
+                            };
+                            tasks.push(newTask);
+                            console.log("Added task from template:", newTask);
+                        });
+
+                        console.log("Logging history event for template load...");
+                        logHistoryEvent('template', `Loaded ${templateLines.length} tasks`);
+
+                        console.log("Rendering tasks...");
+                        renderTasks(); // Update the UI
+
+                        console.log("Load template process finished.");
+                        alert(`Loaded ${templateLines.length} tasks from template.`); // User feedback
+
+                    } catch (error) {
+                        console.error("Error loading task template:", error);
+                        alert("An error occurred while loading the template."); // User feedback
+                    }
+                }
+            );
+        }
+
+        // --- Clear Functions ---
+        function clearAllTasks() {
+            console.log("clearAllTasks function called.");
+            if (tasks.length === 0) {
+                alert("Task list is already empty.");
+                return;
+            }
+
+            // Use the custom confirmation modal
+            showConfirmationModal(
+                "Are you sure you want to delete ALL tasks? This cannot be undone.",
+                () => { // Callback function if user confirms
+                    console.log("Clear tasks confirmed by user via custom modal.");
+                    try {
+                        const count = tasks.length;
+                        tasks = []; // Clear the tasks array
+                        console.log("Tasks array cleared. Logging history event...");
+                        logHistoryEvent('cleared', `Cleared ${count} tasks`);
+
+                        console.log("Rendering tasks...");
+                        renderTasks(); // Update the UI
+
+                        console.log("Clear tasks process finished.");
+                        alert(`Cleared ${count} tasks.`); // User feedback
+                    } catch(e) {
+                         console.error("Error clearing tasks:", e);
+                         alert("An error occurred while clearing tasks.");
+                    }
+                }
+            );
+        }
+
+        function clearHistory() {
+            console.log("clearHistory function called."); // Log when function starts
+            if (taskHistory.length === 0) {
+                alert("History is already empty.");
+                return;
+            }
+
+            // Use the custom confirmation modal
+            showConfirmationModal(
+                "Are you sure you want to clear the entire task history? This cannot be undone.",
+                () => { // This is the callback function executed if user clicks "Yes"
+                    console.log("Executing 'Clear History' confirmation callback."); // Log start of callback
+                    try {
+                        const count = taskHistory.length;
+                        console.log(`Current history length: ${count}. Clearing array...`);
+                        taskHistory = []; // Clear the array
+                        console.log("History array cleared. Saving state...");
+                        saveState(); // Save the empty history (important!)
+                        console.log("Checking if history tab is active...");
+                        // Update UI only if the history tab is currently visible
+                        if (tabHistory && tabHistory.classList.contains('active')) {
+                            console.log("History tab is active, rendering history...");
+                            renderHistory(); // Update UI
+                        }
+                        console.log("Clear history process finished inside callback.");
+                        alert(`Cleared ${count} history events.`); // User feedback
+                    } catch(e) {
+                        console.error("Error inside clearHistory callback:", e);
+                        alert("An error occurred while clearing history."); // User feedback
+                    }
+                }
+            );
+        }
+
 
         // --- Theme Management ---
         function applyTheme(themeName) {
             console.log(`Applying theme: ${themeName}`);
-            document.body.dataset.theme = themeName;
-            if(themeButtons){
+            document.body.dataset.theme = themeName; // Set the data attribute on the body
+
+            // Update button active states
+            if(themeButtons){ // Check if buttons exist
                 themeButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.themeValue === themeName);
                 });
             } else {
                 console.warn("Theme buttons not found when applying theme.");
             }
+
             // Re-apply highlights after theme change as colors might have updated
-            if(appInitialized) {
-                updateDateTime(); // This will call the highlight functions
+            if(appInitialized) { // Only run if app is fully loaded
+                 updateDateTime(); // This will re-run the highlight functions which use getThemeColor
             }
         }
+
         function setupThemeSwitcher() {
             console.log("Setting up theme switcher...");
-            if (!themeButtons) { console.error("Theme buttons not found during setup."); return; }
+            if (!themeButtons || themeButtons.length === 0) { // Check if buttons exist
+                console.error("Theme buttons not found during setup.");
+                return;
+            }
             themeButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const selectedTheme = button.dataset.themeValue;
                     applyTheme(selectedTheme);
+                    // Save the selected theme to localStorage
                     try {
-                        localStorage.setItem(LS_THEME_KEY, selectedTheme); // Save theme choice
-                    } catch (e) { console.error("Could not save theme to localStorage:", e); }
+                        localStorage.setItem(LS_THEME_KEY, selectedTheme);
+                    } catch (e) {
+                        console.error("Could not save theme to localStorage:", e);
+                    }
                 });
             });
-             // Theme is loaded and applied in loadState() now
-            console.log(`Initial theme setup complete.`);
+            // Apply the initially loaded or default theme's active state
+            const currentTheme = document.body.dataset.theme || DEFAULT_THEME;
+            applyTheme(currentTheme); // Ensure correct button is active on load
+
+            console.log(`Initial theme setup complete. Current theme: ${currentTheme}`);
         }
 
         // --- Date, Time & Slot Update ---
         function updateDateTime() {
             try {
                 const now = new Date();
+
+                // Format Date (e.g., 21 Apr 2025)
                 const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+                if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString('en-GB', dateOptions);
+                else console.warn("dateDisplay element not found during update.");
+
+                // Format Time (e.g., 06:56:00 pm)
                 const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                if (timeDisplay) timeDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions).toLowerCase();
+                else console.warn("timeDisplay element not found during update.");
 
-                if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString('en-GB', dateOptions); else console.warn("dateDisplay not found");
-                if (timeDisplay) timeDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions).toLowerCase(); else console.warn("timeDisplay not found");
-
-                updateActiveHoursHighlight(now); // Update active hours bar
-                updateFullDaySlotsHighlight(now); // Update full day grid
-                updateSlotTimer(now); // Update countdown timer
+                // Update visual elements based on current time
+                updateActiveHoursHighlight(now);
+                updateFullDaySlotsHighlight(now);
+                updateSlotTimer(now);
 
             } catch (error) {
                 console.error("Error in updateDateTime:", error);
-                if(intervalId) clearInterval(intervalId); // Stop updates on critical error
+                // Stop the interval if there's a persistent error
+                if(intervalId) clearInterval(intervalId);
+                // Optionally display an error message to the user in the UI
             }
         }
 
         // --- Time Bars ---
-
-        // Generate the Active Hours Bar (Tile 3)
-        function generateActiveHoursBar() {
-            console.log("Generating active hours bar...");
-            if (!activeHoursBarContainer) { console.error("activeHoursBarContainer not found"); return; }
-            activeHoursBarContainer.innerHTML = ''; // Clear previous blocks
-            const totalActiveSlots = (activeEndHour - activeStartHour) * SLOTS_PER_HOUR;
-            if (totalActiveSlots <= 0 || !Number.isInteger(totalActiveSlots)) {
-                console.warn("Invalid active hours range, no slots generated.");
-                activeHoursBarContainer.innerHTML = '<p class="text-xs text-muted">Invalid range</p>';
-                if(activeHoursCountSpan) activeHoursCountSpan.textContent = `(0/0)`;
-                return;
+        function generateTimeBlocks(container, totalSlots, isFullDayBar) {
+             if (!container) {
+                console.error(`Container element not found for generating ${isFullDayBar ? 'full day' : 'active hours'} bar.`);
+                return 0; // Indicate failure or no slots generated
             }
-            for (let i = 0; i < totalActiveSlots; i++) {
+            container.innerHTML = ''; // Clear previous blocks
+            let generatedCount = 0;
+
+            for (let i = 0; i < totalSlots; i++) {
                 const block = document.createElement('div');
                 block.classList.add('time-block');
-                const actualSlotIndex24 = (activeStartHour * SLOTS_PER_HOUR) + i;
+
+                let actualSlotIndex24;
+                if (isFullDayBar) {
+                    actualSlotIndex24 = i; // For full day, index is direct
+                } else {
+                    // For active hours, calculate the 24-hour index
+                    actualSlotIndex24 = (activeStartHour * SLOTS_PER_HOUR) + i;
+                    // Basic sanity check
+                    if (actualSlotIndex24 >= (activeEndHour * SLOTS_PER_HOUR)) {
+                        console.warn(`Calculated slot index ${actualSlotIndex24} exceeds active end hour range. Skipping.`);
+                        continue; // Skip generating this block if calculation seems off
+                    }
+                }
+
                 block.dataset.slotIndex24 = actualSlotIndex24; // Store the 0-47 index
+
+                // Calculate time string for tooltip
                 const hour = Math.floor(actualSlotIndex24 / SLOTS_PER_HOUR);
                 const minute = (actualSlotIndex24 % SLOTS_PER_HOUR) * 30;
                 const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                 block.title = `Slot: ${timeString}`;
-                activeHoursBarContainer.appendChild(block);
+
+                container.appendChild(block);
+                generatedCount++;
             }
-            console.log(`Generated ${totalActiveSlots} active slot blocks.`);
+            console.log(`Generated ${generatedCount} ${isFullDayBar ? 'full day' : 'active'} slot blocks.`);
+            return generatedCount;
         }
 
-        // Generate the Full Day Slots Grid (Tile 3)
+        function generateActiveHoursBar() {
+            console.log("Generating active hours bar...");
+            const totalActiveSlots = (activeEndHour - activeStartHour) * SLOTS_PER_HOUR;
+
+            if (totalActiveSlots <= 0 || !Number.isInteger(totalActiveSlots)) {
+                console.warn("Invalid active hours range, no slots generated.");
+                if (activeHoursBarContainer) activeHoursBarContainer.innerHTML = '<p class="text-xs text-muted">Invalid range</p>';
+                if (activeHoursCountSpan) activeHoursCountSpan.textContent = `(0/0)`;
+                return;
+            }
+            generateTimeBlocks(activeHoursBarContainer, totalActiveSlots, false);
+        }
+
         function generateFullDaySlotsBar() {
             console.log("Generating full day slots bar...");
-            if (!fullDaySlotsBarContainer) { console.error("fullDaySlotsBarContainer not found"); return; }
-            fullDaySlotsBarContainer.innerHTML = ''; // Clear previous blocks
-            for (let i = 0; i < TOTAL_DAY_SLOTS; i++) { // Always generate 48 slots
-                const block = document.createElement('div');
-                block.classList.add('time-block'); // Use the same base class
-                block.dataset.slotIndex24 = i; // Store the 0-47 index
-                const hour = Math.floor(i / SLOTS_PER_HOUR);
-                const minute = (i % SLOTS_PER_HOUR) * 30;
-                const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                block.title = `Slot: ${timeString}`;
-                fullDaySlotsBarContainer.appendChild(block);
-            }
-            console.log(`Generated ${TOTAL_DAY_SLOTS} full day slot blocks.`);
+            generateTimeBlocks(fullDaySlotsBarContainer, TOTAL_DAY_SLOTS, true);
         }
 
-        // Update Highlighting for BOTH bars/grids
         function updateHighlightGeneric(container, currentTime, isFullDayBar) {
-             if (!container) {
-                 console.warn(`Container not found for highlighting (isFullDayBar: ${isFullDayBar})`);
-                 return;
-             }
-             try {
+            if (!container) {
+                // This warning is helpful but can be noisy if expected (e.g., during init)
+                // console.warn(`Container not found for highlighting (isFullDayBar: ${isFullDayBar})`);
+                return;
+            }
+            try {
                 const currentHour = currentTime.getHours();
                 const currentMinute = currentTime.getMinutes();
-                const currentSlotIndex24 = Math.floor((currentHour * 60 + currentMinute) / 30); // 0-47 index
+                // Calculate the index (0-47) of the current 30-minute slot
+                const currentSlotIndex24 = Math.floor((currentHour * 60 + currentMinute) / 30);
 
+                // Get theme colors (do this inside as theme might change)
                 const defaultBorderColor = getThemeColor('--grid-border', '#e2e8f0');
+
                 const slotBlocks = container.querySelectorAll('.time-block');
                 if (slotBlocks.length === 0) return; // Nothing to update
 
                 let passedActiveSlots = 0;
                 const activeStartSlotIndex = activeStartHour * SLOTS_PER_HOUR;
-                const activeEndSlotIndex = activeEndHour * SLOTS_PER_HOUR;
-                let futureBlockCounter = 0; // Counter for cycling colors
+                const activeEndSlotIndex = activeEndHour * SLOTS_PER_HOUR; // Exclusive end
+
+                let futureBlockCounter = 0; // For cycling future colors
 
                 slotBlocks.forEach(block => {
                     const slotIndex24 = parseInt(block.dataset.slotIndex24, 10);
-                    if (isNaN(slotIndex24)) return; // Skip if data attribute is missing/invalid
+                    if (isNaN(slotIndex24)) return; // Skip if data attribute is missing or invalid
 
-                    // Reset classes and inline styles first
-                    block.className = 'time-block'; // Keep only the base class
+                    // Reset classes and styles first
+                    block.className = 'time-block'; // Base class only
                     block.style.background = '';
                     block.style.borderColor = '';
                     block.style.boxShadow = '';
@@ -536,17 +983,14 @@
                     block.style.zIndex = '';
                     block.style.position = '';
 
-
-                    // Determine state: past, current, future
+                    // Apply state class
                     if (slotIndex24 < currentSlotIndex24) {
                         block.classList.add('past');
-                        // Style handled by CSS
                     } else if (slotIndex24 === currentSlotIndex24) {
                         block.classList.add('current');
-                        // Style handled by CSS
-                    } else { // Future
+                    } else {
                         block.classList.add('future');
-                        // Apply cycling color directly for future blocks
+                        // Apply cycling future colors
                         const colorIndex = futureBlockCounter % futureColors.length;
                         const blockColor = futureColors[colorIndex];
                         block.style.background = blockColor;
@@ -554,18 +998,18 @@
                         futureBlockCounter++;
                     }
 
-                    // Count passed slots *within the active range* for the Active Hours Bar display
+                    // Count passed slots *within the active range* for the active hours bar
                     if (!isFullDayBar && slotIndex24 >= activeStartSlotIndex && slotIndex24 < activeEndSlotIndex) {
-                         if (slotIndex24 <= currentSlotIndex24) {
-                             passedActiveSlots++;
-                         }
+                        if (slotIndex24 <= currentSlotIndex24) { // Count current slot as passed too
+                            passedActiveSlots++;
+                        }
                     }
                 });
 
-                // Update the count display ONLY for the Active Hours Bar
+                // Update the count display for the active hours bar
                 if (!isFullDayBar && activeHoursCountSpan) {
                     const totalActiveSlotsInCurrentRange = Math.max(0, (activeEndHour - activeStartHour) * SLOTS_PER_HOUR);
-                    // Ensure count doesn't exceed total active slots
+                    // Ensure passed count doesn't exceed total
                     passedActiveSlots = Math.min(passedActiveSlots, totalActiveSlotsInCurrentRange);
                     activeHoursCountSpan.textContent = `(${passedActiveSlots}/${totalActiveSlotsInCurrentRange})`;
                 }
@@ -586,47 +1030,60 @@
 
         // --- Current Slot Timer Logic (Tile 2) ---
         function updateSlotTimer(now) {
-             try {
-                 if (!slotTimerDisplay || !slotsPassedDisplay) return;
-                 const currentMinutes = now.getMinutes();
-                 const currentSeconds = now.getSeconds();
-                 const minutesIntoSlot = currentMinutes % 30;
-                 const secondsIntoSlot = minutesIntoSlot * 60 + currentSeconds;
-                 const totalSecondsInSlot = 30 * 60;
-                 // Calculate remaining seconds, ensuring it doesn't go below zero
-                 const secondsRemaining = Math.max(0, totalSecondsInSlot - secondsIntoSlot - 1);
-                 slotTimerDisplay.textContent = formatTime(secondsRemaining);
+            try {
+                if (!slotTimerDisplay || !slotsPassedDisplay) return;
 
-                 // Calculate total slots passed since midnight
-                 const currentHour = now.getHours();
-                 const currentTotalMinutes = currentHour * 60 + currentMinutes;
-                 const currentSlotIndex = Math.floor(currentTotalMinutes / 30); // 0-47
-                 slotsPassedDisplay.textContent = `${currentSlotIndex + 1} of ${TOTAL_DAY_SLOTS} slots passed`; // Display 1-based index
-             } catch (error) {
-                 console.error("Error updating slot timer:", error);
-                 if (slotTimerDisplay) slotTimerDisplay.textContent = "Error";
-                 if (slotsPassedDisplay) slotsPassedDisplay.textContent = "Error loading slot info";
-             }
+                const currentMinutes = now.getMinutes();
+                const currentSeconds = now.getSeconds();
+
+                // Calculate how many seconds *into* the current 30-min slot we are
+                const minutesIntoSlot = currentMinutes % 30;
+                const secondsIntoSlot = minutesIntoSlot * 60 + currentSeconds;
+
+                // Calculate remaining seconds
+                const totalSecondsInSlot = 30 * 60;
+                // Subtract 1 because the timer shows time *until* the next second ticks over
+                const secondsRemaining = Math.max(0, totalSecondsInSlot - secondsIntoSlot - 1);
+
+                slotTimerDisplay.textContent = formatTime(secondsRemaining);
+
+                // Calculate which slot index (0-47) we are in
+                const currentHour = now.getHours();
+                const currentTotalMinutes = currentHour * 60 + currentMinutes;
+                const currentSlotIndex = Math.floor(currentTotalMinutes / 30);
+                // Display is 1-based (e.g., "1 of 48")
+                slotsPassedDisplay.textContent = `${currentSlotIndex + 1} of ${TOTAL_DAY_SLOTS} slots passed`;
+
+            } catch (error) {
+                console.error("Error updating slot timer:", error);
+                if (slotTimerDisplay) slotTimerDisplay.textContent = "Error";
+                if (slotsPassedDisplay) slotsPassedDisplay.textContent = "Error loading slot info";
+            }
         }
 
         // --- Task History ---
         function logHistoryEvent(action, taskText) {
             try {
-                // Ensure taskText is a string and reasonably sized
-                const textToLog = typeof taskText === 'string' ? taskText.substring(0, 100) : 'Invalid Task Text'; // Limit length
+                // Sanitize and truncate text
+                const textToLog = typeof taskText === 'string' ? taskText.substring(0, 100) : 'Invalid Text'; // Limit length
+
                 const event = {
-                    timestamp: new Date(), // Store as Date object
-                    action: action,
+                    timestamp: new Date(), // Use current date/time
+                    action: action,        // e.g., 'added', 'completed', 'deleted'
                     taskText: textToLog
                 };
-                taskHistory.unshift(event); // Add to beginning
-                // Optional: Limit history size
-                if (taskHistory.length > 100) { // Keep only last 100 events
-                    taskHistory.pop();
+
+                taskHistory.unshift(event); // Add to the beginning of the array
+
+                // Limit history size (optional)
+                if (taskHistory.length > 100) { // Keep only the latest 100 events
+                    taskHistory.pop(); // Remove the oldest event
                 }
+
                 console.log("History event logged:", event);
-                saveState(); // Save state after logging history
-                // Update UI only if history tab is active
+                saveState(); // Persist the updated history
+
+                // Update UI immediately IF the history tab is currently visible
                 if (tabHistory && tabHistory.classList.contains('active')) {
                     renderHistory();
                 }
@@ -636,170 +1093,218 @@
         }
 
         function renderHistory() {
-            if (!historyLogContainer) { console.error("History container not found"); return; }
+            if (!historyLogContainer) {
+                console.error("History container not found for rendering.");
+                return;
+            }
             try {
                 historyLogContainer.innerHTML = ''; // Clear previous entries
+
                 if (taskHistory.length === 0) {
                     historyLogContainer.innerHTML = '<p class="text-muted italic text-center p-4">No history yet.</p>';
                     return;
                 }
-                const historyFragment = document.createDocumentFragment();
+
+                const historyFragment = document.createDocumentFragment(); // More efficient for multiple appends
+
                 taskHistory.forEach(event => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'history-entry';
 
+                    // Timestamp (right side)
                     const timestampSpan = document.createElement('span');
                     timestampSpan.className = 'history-timestamp';
-                    // Format timestamp from Date object
+                    // Ensure timestamp is a Date object before formatting
                     timestampSpan.textContent = event.timestamp instanceof Date
                         ? event.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : 'Invalid Date';
 
+                    // Details (left side: Action + Text)
                     const detailsSpan = document.createElement('span');
-                    detailsSpan.className = 'history-details'; // Changed class for clarity
+                    detailsSpan.className = 'history-details'; // Simple container
 
+                    // Action (e.g., "Added:")
                     const actionSpan = document.createElement('span');
-                    // Sanitize action for class name
+                    // Sanitize action for class name (allow only letters/numbers)
                     const actionClass = String(event.action).replace(/[^a-z0-9]/gi, '').toLowerCase();
-                    actionSpan.className = `history-action history-action-${actionClass}`;
-                    actionSpan.textContent = `${event.action.charAt(0).toUpperCase() + event.action.slice(1)}: `;
+                    actionSpan.className = `history-action history-action-${actionClass}`; // e.g., history-action-added
+                    actionSpan.textContent = `${event.action.charAt(0).toUpperCase() + event.action.slice(1)}: `; // Capitalize action
 
+                    // Task Text
                     const textSpan = document.createElement('span');
                     textSpan.className = 'history-text';
-                    textSpan.textContent = event.taskText; // Already sanitized/shortened in logHistoryEvent
+                    textSpan.textContent = event.taskText;
 
+                    // Append Action and Text to Details
                     detailsSpan.appendChild(actionSpan);
                     detailsSpan.appendChild(textSpan);
-                    entryDiv.appendChild(detailsSpan); // Add details first
-                    entryDiv.appendChild(timestampSpan); // Add timestamp last
+
+                    // Append Details and Timestamp to the main entry div
+                    entryDiv.appendChild(detailsSpan);
+                    entryDiv.appendChild(timestampSpan);
 
                     historyFragment.appendChild(entryDiv);
                 });
-                historyLogContainer.appendChild(historyFragment);
+
+                historyLogContainer.appendChild(historyFragment); // Append all entries at once
+
             } catch (error) {
                 console.error("Error rendering history:", error);
-                historyLogContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading history.</p>';
+                historyLogContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading history.</p>'; // Error message in UI
             }
         }
 
 
         // --- Task Checklist ---
         function renderTasks() {
-            if (!taskListContainer) { console.error("Task list container not found in renderTasks"); return; }
+            if (!taskListContainer) {
+                console.error("Task list container not found in renderTasks");
+                return;
+            }
             try {
                 taskListContainer.innerHTML = ''; // Clear existing tasks
+
                 if (tasks.length === 0) {
-                    taskListContainer.innerHTML = '<p class="text-muted italic text-center p-4">No tasks yet. Add one below!</p>';
+                    taskListContainer.innerHTML = '<p class="text-muted italic text-center p-4">No tasks yet. Add one below or load a template!</p>';
                 } else {
-                    const taskFragment = document.createDocumentFragment(); // Use fragment for performance
+                    const taskFragment = document.createDocumentFragment(); // For efficiency
+
                     tasks.forEach(task => {
                         const taskElement = document.createElement('div');
                         taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
-                        taskElement.dataset.taskId = task.id;
+                        taskElement.dataset.taskId = task.id; // Store task ID for easy access
 
+                        // Label contains checkbox and text
                         const label = document.createElement('label');
+
+                        // Checkbox
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.checked = task.completed;
-                        checkbox.addEventListener('change', () => toggleTask(task.id));
+                        checkbox.addEventListener('change', () => toggleTask(task.id)); // Use arrow function to pass ID
 
+                        // Task Text
                         const taskText = document.createElement('span');
-                        taskText.textContent = task.text; // Display task text
+                        taskText.textContent = task.text;
+
                         label.appendChild(checkbox);
                         label.appendChild(taskText);
 
+                        // Delete Button
                         const deleteButton = document.createElement('button');
                         deleteButton.className = 'delete-button';
                         deleteButton.title = 'Delete Task';
+                        // Inline SVG for trash icon
                         deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
                         deleteButton.addEventListener('click', (e) => {
-                             e.stopPropagation(); // Prevent label click
-                             deleteTask(task.id);
+                            e.stopPropagation(); // Prevent label click event if button is inside label
+                            deleteTask(task.id); // Use arrow function to pass ID
                         });
 
-
+                        // Append label and button to the task item div
                         taskElement.appendChild(label);
                         taskElement.appendChild(deleteButton);
-                        taskFragment.appendChild(taskElement);
+
+                        taskFragment.appendChild(taskElement); // Add the task item to the fragment
                     });
-                    taskListContainer.appendChild(taskFragment); // Append fragment once
+
+                    taskListContainer.appendChild(taskFragment); // Append all tasks at once
                 }
-                updateProgressBar(); // Update progress after rendering
+
+                updateProgressBar(); // Update progress bar after rendering tasks
+                saveState(); // Save state whenever tasks are rendered (added, deleted, toggled)
+
             } catch (error) {
                 console.error("Error rendering tasks:", error);
-                taskListContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading tasks.</p>';
+                taskListContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading tasks.</p>'; // Error message in UI
             }
         }
 
         function addTask() {
             console.log("addTask called");
-            if (!newTaskInput || !taskListContainer) { console.error("Missing elements for addTask"); return; }
-            const text = newTaskInput.value.trim();
+            if (!newTaskInput || !taskListContainer) {
+                console.error("Missing elements for addTask (input or container)");
+                return;
+            }
+            const text = newTaskInput.value.trim(); // Get and trim input value
             console.log("Task text:", text);
-            if (text) {
+
+            if (text) { // Only add if text is not empty
                 try {
-                    const newTask = { id: nextTaskId++, text: text, completed: false };
-                    tasks.push(newTask);
-                    logHistoryEvent('added', text); // Log before saving state
-                    newTaskInput.value = ''; // Clear input
-                    renderTasks(); // Re-render the list
-                    // saveState() is called within logHistoryEvent now
+                    const newTask = {
+                        id: nextTaskId++, // Use current nextTaskId and then increment it
+                        text: text,
+                        completed: false // New tasks start as incomplete
+                    };
+                    tasks.push(newTask); // Add to the tasks array
+                    logHistoryEvent('added', text); // Log the addition
+                    newTaskInput.value = ''; // Clear the input field
+                    renderTasks(); // Re-render the task list UI
                 } catch (error) {
                     console.error("Error adding task:", error);
-                    // Optionally inform the user
+                    alert("Failed to add task."); // User feedback
                 }
             } else {
-                 console.log("Task text is empty, not adding.");
-                 // Maybe provide visual feedback? e.g., shake the input box
+                console.log("Task text is empty, not adding.");
+                // Optionally provide feedback: alert("Please enter task text.");
             }
         }
 
         function toggleTask(id) {
             try {
-                let taskIndex = tasks.findIndex(task => task.id === id);
+                const taskIndex = tasks.findIndex(task => task.id === id);
                 if (taskIndex === -1) {
                     console.warn(`Task with id ${id} not found for toggling.`);
-                    return;
+                    return; // Exit if task not found
                 }
-                let task = tasks[taskIndex];
-                let originalText = task.text;
-                let wasCompleted = task.completed;
 
-                // Create a new object for the updated task to ensure reactivity if needed later
+                const task = tasks[taskIndex];
+                const originalText = task.text; // Get text before modification
+                const wasCompleted = task.completed;
+
+                // Toggle the completed status
                 tasks[taskIndex] = { ...task, completed: !wasCompleted };
 
+                // Log the correct action based on the *previous* state
                 logHistoryEvent(wasCompleted ? 'uncompleted' : 'completed', originalText);
-                renderTasks(); // Re-render the list
-                // saveState() is called within logHistoryEvent now
+
+                renderTasks(); // Re-render the list to reflect the change
             } catch(e) {
-                console.error("Error toggling task:", e);
+                console.error(`Error toggling task with id ${id}:`, e);
+                alert("Failed to update task status."); // User feedback
             }
         }
 
         function deleteTask(id) {
-            try {
-                let taskIndex = tasks.findIndex(task => task.id === id);
-                 if (taskIndex === -1) {
+             try {
+                const taskIndex = tasks.findIndex(task => task.id === id);
+                if (taskIndex === -1) {
                     console.warn(`Task with id ${id} not found for deletion.`);
-                    return;
+                    return; // Exit if task not found
                 }
-                let taskToDelete = tasks[taskIndex];
-                logHistoryEvent('deleted', taskToDelete.text);
-                tasks.splice(taskIndex, 1); // Remove task from array
+
+                const taskToDelete = tasks[taskIndex];
+                logHistoryEvent('deleted', taskToDelete.text); // Log deletion before removing
+
+                tasks.splice(taskIndex, 1); // Remove the task from the array
+
                 renderTasks(); // Re-render the list
-                // saveState() is called within logHistoryEvent now
             } catch(e) {
-                console.error("Error deleting task:", e);
+                console.error(`Error deleting task with id ${id}:`, e);
+                alert("Failed to delete task."); // User feedback
             }
         }
 
-
         // --- Progress Bar ---
         function updateProgressBar() {
-            if (!progressBarInner || !progressPercentage) return;
+            if (!progressBarInner || !progressPercentage) {
+                // console.warn("Progress bar elements not found."); // Can be noisy
+                return;
+            }
             const completedTasks = tasks.filter(task => task.completed).length;
             const totalTasks = tasks.length;
             const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
             progressBarInner.style.width = `${percentage}%`;
             progressPercentage.textContent = `${percentage}%`;
         }
@@ -810,14 +1315,20 @@
             try {
                 // Add Task
                 if (addTaskButton) {
-                    addTaskButton.removeEventListener('click', addTask); // Prevent duplicates
+                    addTaskButton.removeEventListener('click', addTask); // Prevent duplicates if run again
                     addTaskButton.addEventListener('click', addTask);
-                } else { console.error("Add task button not found for listener."); }
+                } else console.error("Add task button not found for listener.");
 
                 if (newTaskInput) {
                     newTaskInput.removeEventListener('keypress', handleTaskInputKeypress); // Prevent duplicates
                     newTaskInput.addEventListener('keypress', handleTaskInputKeypress);
-                } else { console.error("New task input not found for listener."); }
+                } else console.error("New task input not found for listener.");
+
+                // Load Template
+                if (loadTemplateButton) {
+                    loadTemplateButton.removeEventListener('click', loadTaskTemplate); // Prevent duplicates
+                    loadTemplateButton.addEventListener('click', loadTaskTemplate);
+                } else console.error("Load template button not found for listener.");
 
                 // Tabs
                 if (tabTasks && tabHistory) {
@@ -825,27 +1336,67 @@
                     tabTasks.addEventListener('click', showTasksTab);
                     tabHistory.removeEventListener('click', showHistoryTab); // Prevent duplicates
                     tabHistory.addEventListener('click', showHistoryTab);
-                } else { console.error("Tab elements not found for listeners."); }
+                } else console.error("Tab elements not found for listeners.");
 
-                // Settings Modal
+                // Clear Tasks (Main Button in Task List)
+                if (clearTasksMainButton) {
+                    clearTasksMainButton.removeEventListener('click', clearAllTasks); // Prevent duplicates
+                    clearTasksMainButton.addEventListener('click', clearAllTasks);
+                } else console.error("Clear tasks main button not found for listener.");
+
+                // Settings Modal Controls
                 if(settingsButton) settingsButton.addEventListener('click', openSettingsModal);
+                else console.error("Settings button not found for listener.");
+
                 if(closeSettingsButton) closeSettingsButton.addEventListener('click', closeSettingsModal);
-                if(settingsOverlay) settingsOverlay.addEventListener('click', closeSettingsModal);
-                if(saveSettingsButton) saveSettingsButton.addEventListener('click', saveSettings);
+                else console.error("Close settings button not found for listener.");
+
+                if(settingsOverlay) settingsOverlay.addEventListener('click', closeSettingsModal); // Close on overlay click
+                else console.error("Settings overlay not found for listener.");
+
+                if(saveSettingsButton) saveSettingsButton.addEventListener('click', saveActiveHours);
+                else console.error("Save settings button not found for listener.");
+
+                if(saveTemplateButton) saveTemplateButton.addEventListener('click', saveTaskTemplate);
+                else console.error("Save template button not found for listener.");
+
+                // Clear History (Button inside Settings Modal)
+                if(clearHistoryButton) {
+                     // *** DEBUG LOGGING ADDED TO LISTENER ***
+                    clearHistoryButton.removeEventListener('click', clearHistory); // Prevent duplicates
+                    clearHistoryButton.addEventListener('click', () => {
+                        console.log("Clear History button (in settings) clicked!");
+                        clearHistory();
+                    });
+                } else console.error("Clear history button not found for listener.");
+
+                // Confirmation Modal Buttons
+                if(confirmNoButton) confirmNoButton.addEventListener('click', hideConfirmationModal);
+                else console.error("Confirm No button not found for listener.");
+
+                if(confirmYesButton) confirmYesButton.addEventListener('click', handleConfirmYes);
+                else console.error("Confirm Yes button not found for listener.");
+
+                if(confirmOverlay) confirmOverlay.addEventListener('click', hideConfirmationModal); // Close on overlay click
+                else console.error("Confirm overlay not found for listener.");
+
 
             } catch (error) {
                 console.error("Error setting up event listeners:", error);
+                // Consider showing an error to the user if setup fails critically
             }
             console.log("Event listeners setup finished.");
         }
 
+        // Handler for Enter key in task input
         function handleTaskInputKeypress(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent potential form submission
+                event.preventDefault(); // Prevent default form submission if it were in a form
                 addTask();
             }
         }
 
+        // Tab Switching Logic
         function showTasksTab() {
             if (!taskListContainer || !historyLogContainer || !tabTasks || !tabHistory) return;
             taskListContainer.classList.remove('hidden');
@@ -860,58 +1411,105 @@
             historyLogContainer.classList.remove('hidden');
             tabTasks.classList.remove('active');
             tabHistory.classList.add('active');
-            renderHistory(); // Render history when tab is shown
+            renderHistory(); // Render history content when tab is activated
         }
 
         // --- Initial Setup ---
         function initializeApp() {
-            if (appInitialized) { console.warn("App already initialized. Skipping."); return; }
+            if (appInitialized) {
+                console.warn("App already initialized. Skipping.");
+                return;
+            }
             console.log("Initializing App...");
 
             try {
                 console.log("Step 1: Selecting DOM elements...");
                 // Select ALL elements needed by the app upfront and check immediately
-                dateDisplay = document.getElementById('date-display'); if (!dateDisplay) throw new Error("Element not found: date-display");
-                timeDisplay = document.getElementById('time-display'); if (!timeDisplay) throw new Error("Element not found: time-display");
-                slotTimerDisplay = document.getElementById('slot-timer-display'); if (!slotTimerDisplay) throw new Error("Element not found: slot-timer-display");
-                slotsPassedDisplay = document.getElementById('slots-passed'); if (!slotsPassedDisplay) throw new Error("Element not found: slots-passed");
-                activeHoursBarContainer = document.getElementById('active-hours-bar'); if (!activeHoursBarContainer) throw new Error("Element not found: active-hours-bar");
-                activeHoursCountSpan = document.getElementById('active-hours-count'); if (!activeHoursCountSpan) throw new Error("Element not found: active-hours-count");
-                activeHoursRangeDisplay = document.getElementById('active-hours-range-display'); if (!activeHoursRangeDisplay) throw new Error("Element not found: active-hours-range-display");
-                fullDaySlotsBarContainer = document.getElementById('full-day-slots-bar'); if (!fullDaySlotsBarContainer) throw new Error("Element not found: full-day-slots-bar"); // New
-                taskListContainer = document.getElementById('task-list-container'); if (!taskListContainer) throw new Error("Element not found: task-list-container");
-                newTaskInput = document.getElementById('new-task-input'); if (!newTaskInput) throw new Error("Element not found: new-task-input");
-                addTaskButton = document.getElementById('add-task-button'); if (!addTaskButton) throw new Error("Element not found: add-task-button");
-                progressBarInner = document.getElementById('progress-bar-inner'); if (!progressBarInner) throw new Error("Element not found: progress-bar-inner");
-                progressPercentage = document.getElementById('progress-percentage'); if (!progressPercentage) throw new Error("Element not found: progress-percentage");
-                themeButtons = document.querySelectorAll('.theme-button'); if (!themeButtons || themeButtons.length === 0) throw new Error("Elements not found: .theme-button");
-                tabTasks = document.getElementById('tab-tasks'); if (!tabTasks) throw new Error("Element not found: tab-tasks");
-                tabHistory = document.getElementById('tab-history'); if (!tabHistory) throw new Error("Element not found: tab-history");
-                historyLogContainer = document.getElementById('history-log-container'); if (!historyLogContainer) throw new Error("Element not found: history-log-container");
-                settingsButton = document.getElementById('settings-button'); if (!settingsButton) throw new Error("Element not found: settings-button");
-                settingsModal = document.getElementById('settings-modal'); if (!settingsModal) throw new Error("Element not found: settings-modal");
-                settingsOverlay = document.getElementById('settings-overlay'); if (!settingsOverlay) throw new Error("Element not found: settings-overlay");
-                startHourSelect = document.getElementById('setting-start-hour'); if (!startHourSelect) throw new Error("Element not found: setting-start-hour");
-                endHourSelect = document.getElementById('setting-end-hour'); if (!endHourSelect) throw new Error("Element not found: setting-end-hour");
-                saveSettingsButton = document.getElementById('save-settings-button'); if (!saveSettingsButton) throw new Error("Element not found: save-settings-button");
-                closeSettingsButton = document.getElementById('close-settings-button'); if (!closeSettingsButton) throw new Error("Element not found: close-settings-button");
-                console.log("Step 1: Finished selecting DOM elements.");
+                // Use a helper function or just list them with checks
+                const requiredIds = [
+                    'date-display', 'time-display', 'slot-timer-display', 'slots-passed',
+                    'active-hours-bar', 'active-hours-count', 'active-hours-range-display',
+                    'full-day-slots-bar', 'task-list-container', 'new-task-input',
+                    'add-task-button', 'load-template-button', 'progress-bar-inner',
+                    'progress-percentage', 'tab-tasks', 'tab-history', 'history-log-container',
+                    'settings-button', 'settings-modal', 'settings-overlay',
+                    'setting-start-hour', 'setting-end-hour', 'save-settings-button',
+                    'close-settings-button', 'setting-task-template', 'save-template-button',
+                    'clear-tasks-main-button', 'clear-history-button',
+                    'confirm-modal', 'confirm-overlay', 'confirm-message',
+                    'confirm-yes-button', 'confirm-no-button'
+                ];
+                let missingElement = false;
+                requiredIds.forEach(id => {
+                    if (!document.getElementById(id)) {
+                        console.error(`Critical Error: Element with ID '${id}' not found.`);
+                        missingElement = true;
+                    }
+                });
+                 // Select theme buttons separately by class
+                themeButtons = document.querySelectorAll('.theme-button');
+                if (!themeButtons || themeButtons.length === 0) {
+                     console.error("Critical Error: Elements with class '.theme-button' not found.");
+                     missingElement = true;
+                }
 
-                console.log("Step 2: Loading state (Settings, Theme, Tasks, History)...");
-                loadState(); // Loads settings, theme, tasks, history
+                if (missingElement) {
+                    throw new Error("One or more required HTML elements are missing. Cannot initialize app.");
+                }
+
+                // Assign elements to variables (only if all checks passed)
+                dateDisplay = document.getElementById('date-display');
+                timeDisplay = document.getElementById('time-display');
+                slotTimerDisplay = document.getElementById('slot-timer-display');
+                slotsPassedDisplay = document.getElementById('slots-passed');
+                activeHoursBarContainer = document.getElementById('active-hours-bar');
+                activeHoursCountSpan = document.getElementById('active-hours-count');
+                activeHoursRangeDisplay = document.getElementById('active-hours-range-display');
+                fullDaySlotsBarContainer = document.getElementById('full-day-slots-bar');
+                taskListContainer = document.getElementById('task-list-container');
+                newTaskInput = document.getElementById('new-task-input');
+                addTaskButton = document.getElementById('add-task-button');
+                loadTemplateButton = document.getElementById('load-template-button');
+                progressBarInner = document.getElementById('progress-bar-inner');
+                progressPercentage = document.getElementById('progress-percentage');
+                // themeButtons selected above
+                tabTasks = document.getElementById('tab-tasks');
+                tabHistory = document.getElementById('tab-history');
+                historyLogContainer = document.getElementById('history-log-container');
+                settingsButton = document.getElementById('settings-button');
+                settingsModal = document.getElementById('settings-modal');
+                settingsOverlay = document.getElementById('settings-overlay');
+                startHourSelect = document.getElementById('setting-start-hour');
+                endHourSelect = document.getElementById('setting-end-hour');
+                saveSettingsButton = document.getElementById('save-settings-button');
+                closeSettingsButton = document.getElementById('close-settings-button');
+                taskTemplateTextarea = document.getElementById('setting-task-template');
+                saveTemplateButton = document.getElementById('save-template-button');
+                clearTasksMainButton = document.getElementById('clear-tasks-main-button');
+                clearHistoryButton = document.getElementById('clear-history-button');
+                confirmModal = document.getElementById('confirm-modal');
+                confirmOverlay = document.getElementById('confirm-overlay');
+                confirmMessage = document.getElementById('confirm-message');
+                confirmYesButton = document.getElementById('confirm-yes-button');
+                confirmNoButton = document.getElementById('confirm-no-button');
+
+                console.log("Step 1: Finished selecting DOM elements successfully.");
+
+                console.log("Step 2: Loading state...");
+                loadState(); // Loads theme, hours, tasks, history, template
                 console.log("Step 2: Finished loading state.");
 
                 console.log("Step 3: Setting up theme switcher...");
-                setupThemeSwitcher(); // Sets up listeners, theme already applied in loadState
+                setupThemeSwitcher(); // Applies loaded theme and sets up buttons
                 console.log("Step 3: Finished setting up theme switcher.");
 
                 console.log("Step 4: Generating time bars/grids...");
-                generateActiveHoursBar();
-                generateFullDaySlotsBar(); // Generate the new grid
+                generateActiveHoursBar(); // Uses loaded active hours
+                generateFullDaySlotsBar();
                 console.log("Step 4: Finished generating time bars/grids.");
 
                 console.log("Step 5: Rendering initial tasks...");
-                renderTasks(); // Render tasks loaded from state
+                renderTasks(); // Uses loaded tasks
                 console.log("Step 5: Finished rendering initial tasks.");
 
                 console.log("Step 6: Setting up event listeners...");
@@ -919,7 +1517,7 @@
                 console.log("Step 6: Finished setting up event listeners.");
 
                 console.log("Step 7: Performing initial date/time update and highlights...");
-                updateDateTime(); // Perform initial update to set time and highlights
+                updateDateTime(); // First update to show current time/highlights
                 console.log("Step 7: Finished initial date/time update.");
 
                 console.log("Step 8: Setting up update interval...");
@@ -928,21 +1526,27 @@
                 console.log("Step 8: Finished setting up update interval.");
 
                 console.log("Step 9: Setting initial tab...");
-                showTasksTab(); // Show tasks tab by default
+                showTasksTab(); // Start on the tasks tab
                 console.log("Step 9: Finished setting initial tab.");
+
+                // Ensure modals are hidden initially (might be visible if CSS defaults change)
+                if(settingsOverlay) settingsOverlay.classList.remove('visible');
+                if(settingsModal) settingsModal.classList.remove('visible');
+                if(confirmOverlay) confirmOverlay.classList.remove('visible');
+                if(confirmModal) confirmModal.classList.remove('visible');
 
                 appInitialized = true;
                 console.log("App Initialized successfully.");
 
             } catch(error) {
-                console.error("Critical Error during app initialization:", error);
+                console.error("CRITICAL ERROR during app initialization:", error);
                 appInitialized = false; // Ensure flag is false on error
-                // Display a user-friendly error message
+                // Display a user-friendly error message covering the app area
                 const body = document.querySelector('body');
                 if (body) {
                      body.innerHTML = `<div class="fixed inset-0 flex items-center justify-center bg-red-100 p-4"><div class="text-center"><h2 class="text-xl font-bold text-red-700 mb-2">Application Error</h2><p class="text-red-600">Could not load the Daily Dash app due to an internal error. Please check the developer console (F12) for details or try refreshing the page.</p><p class="text-sm text-red-500 mt-2">Error: ${error.message || 'Unknown error'}</p></div></div>`;
                 }
-                // Clean up interval if it was somehow set before the error
+                // Stop any intervals if they somehow started before the error
                 if (intervalId) clearInterval(intervalId);
             }
         }
