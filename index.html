@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Box</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base Styles --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color, #f3f4f6);
+            color: var(--text-color, #1f2937);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- Theme Variables --- */
+        :root, body[data-theme='light'] {
+            --bg-color: #f8fafc; --text-color: #1e293b; --tile-bg: #ffffff;
+            --tile-shadow: rgba(0, 0, 0, 0.05); --text-muted: #64748b;
+            --primary-color: #3b82f6; --primary-accent: #1d4ed8;
+            --grid-border: #e2e8f0;
+            /* Current/Past colors - Used by CSS rules */
+            --grid-current-color-start: #60a5fa; --grid-current-color-end: #3b82f6; --grid-current-border: #2563eb;
+            --grid-past-color-start: #e5e7eb; --grid-past-color-end: #d1d5db; --grid-past-border: #d1d5db;
+            /* Future colors are handled by JS cycling */
+            --progress-bg: #e2e8f0; --progress-fill: #3b82f6;
+            --button-add-bg: #22c55e; --button-add-hover: #16a34a;
+            --input-border: #cbd5e1; --input-focus-ring: #60a5fa;
+            --theme-button-bg: #e2e8f0; --theme-button-hover: #cbd5e1;
+            --theme-button-active: #3b82f6; --theme-button-icon: #334155;
+            --task-hover-bg: #f1f5f9; --task-completed-bg: #f8fafc;
+            --task-delete-icon-color: #94a3b8; --task-delete-icon-hover-color: #ef4444;
+            --tab-border: #e2e8f0; --tab-active-border: var(--primary-color); --tab-text: var(--text-muted); --tab-active-text: var(--primary-color);
+            --history-entry-border: #f1f5f9;
+            --modal-bg: var(--tile-bg); --modal-overlay-bg: rgba(0, 0, 0, 0.5);
+            --button-secondary-bg: #e2e8f0; --button-secondary-hover: #cbd5e1; --button-secondary-text: #334155;
+            --button-primary-bg: var(--primary-color); --button-primary-hover: var(--primary-accent); --button-primary-text: #ffffff;
+        }
+        body[data-theme='grey'] {
+             --bg-color: #e5e7eb; --text-color: #1f2937; --tile-bg: #f9fafb; --tile-shadow: rgba(0, 0, 0, 0.05);
+            --text-muted: #4b5563; --primary-color: #6b7280; --primary-accent: #374151;
+            --grid-border: #d1d5db;
+            --grid-current-color-start: #9ca3af; --grid-current-color-end: #6b7280; --grid-current-border: #4b5563;
+            --grid-past-color-start: #e5e7eb; --grid-past-color-end: #d1d5db; --grid-past-border: #d1d5db;
+            --progress-bg: #d1d5db; --progress-fill: #6b7280; --button-add-bg: #52525b; --button-add-hover: #3f3f46;
+            --input-border: #d1d5db; --input-focus-ring: #9ca3af; --theme-button-bg: #d1d5db;
+            --theme-button-hover: #9ca3af; --theme-button-active: #6b7280; --theme-button-icon: #374151;
+            --task-hover-bg: #f3f4f6; --task-completed-bg: #e5e7eb;
+            --tab-border: #d1d5db; --tab-active-border: var(--primary-color); --tab-text: var(--text-muted); --tab-active-text: var(--primary-color);
+            --history-entry-border: #f3f4f6;
+            --button-secondary-bg: #d1d5db; --button-secondary-hover: #9ca3af; --button-secondary-text: #1f2937;
+        }
+        body[data-theme='dark'] {
+            --bg-color: #111827; --text-color: #f9fafb; --tile-bg: #1f2937; --tile-shadow: rgba(0, 0, 0, 0.2);
+            --text-muted: #9ca3af; --primary-color: #60a5fa; --primary-accent: #93c5fd;
+            --grid-border: #374151;
+            --grid-current-color-start: #93c5fd; --grid-current-color-end: #60a5fa; --grid-current-border: #bfdbfe;
+            --grid-past-color-start: #374151; --grid-past-color-end: #4b5563; --grid-past-border: #6b7280;
+            --progress-bg: #374151; --progress-fill: #60a5fa; --button-add-bg: #16a34a; --button-add-hover: #15803d;
+            --input-border: #4b5563; --input-focus-ring: #60a5fa; --theme-button-bg: #374151;
+            --theme-button-hover: #4b5563; --theme-button-active: #60a5fa; --theme-button-icon: #d1d5db;
+            --task-hover-bg: #374151; --task-completed-bg: #111827;
+            --task-delete-icon-color: #6b7280; --task-delete-icon-hover-color: #f87171;
+            --tab-border: #374151; --tab-active-border: var(--primary-color); --tab-text: var(--text-muted); --tab-active-text: var(--primary-color);
+            --history-entry-border: #374151;
+            --modal-bg: var(--tile-bg); --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+            --button-secondary-bg: #374151; --button-secondary-hover: #4b5563; --button-secondary-text: #d1d5db;
+            --button-primary-text: #111827;
+        }
+
+        /* --- Component Styles --- */
+        .main-title { color: var(--text-color); }
+        .tile { background-color: var(--tile-bg); box-shadow: 0 4px 6px -1px var(--tile-shadow), 0 2px 4px -1px var(--tile-shadow); transition: background-color 0.3s ease; border-radius: 0.5rem; }
+        .tile-title { color: var(--text-color); }
+        .text-muted { color: var(--text-muted); }
+        .text-primary { color: var(--primary-color); }
+        .text-primary-accent { color: var(--primary-accent); }
+
+        /* Time Block Styles */
+        .time-block {
+            width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+            overflow: hidden;
+            border: 1px solid var(--grid-border);
+            /* No default background - JS or specific classes will set it */
+        }
+        .time-block.past {
+            background: linear-gradient(135deg, var(--grid-past-color-start), var(--grid-past-color-end)); /* Set background via CSS */
+            border-color: var(--grid-past-border);
+            opacity: 0.6; transform: scale(1); box-shadow: none; z-index: 1;
+        }
+        .time-block.current {
+            background: linear-gradient(135deg, var(--grid-current-color-start), var(--grid-current-color-end)); /* Set background via CSS */
+            border: 1px solid var(--grid-current-border); /* Set border via CSS */
+            box-shadow: 0 0 6px 1px var(--grid-current-border);
+            transform: scale(1.1); z-index: 10; position: relative; opacity: 1.0;
+        }
+        /* Future blocks get background set by JS */
+        .bar-container { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; }
+
+        /* --- Other styles remain the same --- */
+        .progress-bar-bg { background-color: var(--progress-bg); }
+        .progress-bar-fill { background-color: var(--progress-fill); transition: width 0.5s ease-in-out, background-color 0.3s ease; }
+        .task-list-container::-webkit-scrollbar-track, .history-log-container::-webkit-scrollbar-track { background: var(--bg-color); }
+        .task-list-container::-webkit-scrollbar-thumb, .history-log-container::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
+        .task-list-container::-webkit-scrollbar-thumb:hover, .history-log-container::-webkit-scrollbar-thumb:hover { background: var(--text-color); }
+        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--grid-border); transition: background-color 0.2s ease, opacity 0.3s ease; border-radius: 4px; }
+        .task-item:last-child { border-bottom: none; }
+        .task-item:hover { background-color: var(--task-hover-bg); }
+        .task-item:hover .delete-button { opacity: 1; }
+        .task-item label { display: flex; align-items: center; cursor: pointer; flex-grow: 1; margin-right: 0.5rem; }
+        .task-item input[type="checkbox"] { margin-right: 0.75rem; accent-color: var(--primary-color); width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+        .task-item span { word-break: break-word; transition: color 0.3s ease; }
+        .task-item.completed { opacity: 0.7; background-color: var(--task-completed-bg); }
+        .task-item.completed span { text-decoration: line-through; color: var(--text-muted); text-decoration-color: var(--text-muted); }
+        .delete-button { opacity: 0; background: none; border: none; padding: 0.25rem; cursor: pointer; transition: opacity 0.2s ease, color 0.2s ease; color: var(--task-delete-icon-color); line-height: 1; flex-shrink: 0; }
+        .delete-button:hover { color: var(--task-delete-icon-hover-color); }
+        .delete-button svg { display: block; width: 16px; height: 16px; }
+        .add-task-container { margin-top: 1rem; display: flex; gap: 0.5rem; }
+        .input-field { border: 1px solid var(--input-border); background-color: var(--tile-bg); color: var(--text-color); flex-grow: 1; border-radius: 0.375rem; padding: 0.6rem 0.75rem; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .input-field:focus { border-color: transparent; --tw-ring-color: var(--input-focus-ring); --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); outline: 2px solid transparent; outline-offset: 2px; }
+        .button-add { background-color: var(--button-add-bg); color: #fff; transition: background-color 0.2s ease; font-weight: 500; padding: 0.6rem 1rem; border-radius: 0.375rem; display: inline-flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+        .button-add:hover { background-color: var(--button-add-hover); }
+        .button-add svg { /* SVG already inline */ }
+        .theme-switcher { background-color: var(--tile-bg); border-radius: 0.5rem; padding: 0.5rem; box-shadow: 0 2px 4px -1px var(--tile-shadow); margin-bottom: 1.5rem; }
+        .theme-button { background-color: var(--theme-button-bg); border-radius: 0.375rem; padding: 0.5rem; transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; border: 2px solid transparent; }
+        .theme-button:hover { background-color: var(--theme-button-hover); }
+        .theme-button.active { border-color: var(--theme-button-active); box-shadow: 0 0 0 2px var(--theme-button-active); }
+        .theme-button svg { color: var(--theme-button-icon); transition: color 0.3s ease; width: 20px; height: 20px; display: block; }
+        .theme-button.active svg { color: var(--theme-button-active); }
+        .datetime-icon { color: var(--primary-color); flex-shrink: 0; width:20px; height:20px; }
+        .tab-container { border-bottom: 1px solid var(--tab-border); margin-bottom: 1rem; }
+        .tab-button { padding: 0.5rem 1rem; margin-bottom: -1px; border: none; border-bottom: 2px solid transparent; background: none; cursor: pointer; color: var(--tab-text); font-weight: 500; transition: color 0.2s ease, border-color 0.2s ease; }
+        .tab-button:hover { color: var(--primary-color); }
+        .tab-button.active { color: var(--tab-active-text); border-bottom-color: var(--tab-active-border); }
+        .history-log-container { /* Shares scrollbar style */ }
+        .history-entry { font-size: 0.875rem; padding: 0.5rem; border-bottom: 1px solid var(--history-entry-border); display: flex; justify-content: space-between; gap: 0.5rem; }
+        .history-entry:last-child { border-bottom: none; }
+        .history-timestamp { color: var(--text-muted); font-size: 0.75rem; white-space: nowrap; }
+        .history-action { font-weight: 500; }
+        .history-action-added { color: var(--button-add-bg); } .history-action-completed { color: var(--primary-color); }
+        .history-action-uncompleted { color: var(--text-muted); } .history-action-deleted { color: var(--task-delete-icon-hover-color); }
+        .history-text { color: var(--text-color); word-break: break-word; }
+        .modal-overlay { position: fixed; inset: 0; background-color: var(--modal-overlay-bg); z-index: 40; transition: opacity 0.3s ease-in-out; opacity: 1; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--modal-bg); color: var(--text-color); padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); width: 90%; max-width: 400px; z-index: 50; transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; opacity: 1; }
+        .modal.hidden, .modal-overlay.hidden { opacity: 0; pointer-events: none; transform: translate(-50%, -45%); }
+        .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .modal-label { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
+        .modal-select { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.375rem; border: 1px solid var(--input-border); background-color: var(--bg-color); color: var(--text-color); margin-bottom: 1rem; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
+        .button-secondary { background-color: var(--button-secondary-bg); color: var(--button-secondary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; }
+        .button-secondary:hover { background-color: var(--button-secondary-hover); }
+        .button-primary { background-color: var(--button-primary-bg); color: var(--button-primary-text); padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s ease; }
+        .button-primary:hover { background-color: var(--button-primary-hover); }
+        #settings-button { position: fixed; top: 1rem; left: 1rem; z-index: 30; background-color: var(--tile-bg); color: var(--text-muted); padding: 0.5rem; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; border: 1px solid var(--grid-border); }
+        #settings-button:hover { background-color: var(--theme-button-hover); color: var(--text-color); }
+        #settings-button svg { display: block; width: 20px; height: 20px; }
+
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <button id="settings-button" title="Settings"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> </button>
+    <div id="settings-overlay" class="modal-overlay hidden"></div>
+    <div id="settings-modal" class="modal hidden"> <h2 class="modal-title">Settings</h2> <div class="space-y-4"> <div> <label for="setting-start-hour" class="modal-label">Active Hours Start (0-23)</label> <select id="setting-start-hour" class="modal-select"></select> </div> <div> <label for="setting-end-hour" class="modal-label">Active Hours End (1-24)</label> <select id="setting-end-hour" class="modal-select"></select> </div> </div> <div class="modal-buttons"> <button id="close-settings-button" class="button-secondary">Close</button> <button id="save-settings-button" class="button-primary">Save</button> </div> </div>
+    <h1 class="main-title text-4xl md:text-5xl font-bold text-center mb-6">Time Box</h1>
+    <div class="theme-switcher max-w-xs mx-auto"> <div class="flex justify-center gap-3"> <button class="theme-button" data-theme-value="light" title="Light"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg> </button> <button class="theme-button" data-theme-value="grey" title="Grey"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg> </button> <button class="theme-button" data-theme-value="dark" title="Dark"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg> </button> </div> </div>
+    <div class="max-w-6xl mx-auto space-y-6"> <div class="grid grid-cols-1 md:grid-cols-3 gap-6"> <div class="tile p-6 rounded-lg flex flex-col items-center justify-center text-center space-y-3"> <div class="flex items-center justify-center space-x-3 w-full"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="datetime-icon"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg> <p id="date-display" class="text-lg text-muted whitespace-nowrap">Loading Date...</p> </div> <div class="flex items-center justify-center space-x-3 w-full"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="datetime-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <p id="time-display" class="font-medium text-2xl text-primary whitespace-nowrap">Loading Time...</p> </div> </div> <div class="tile p-6 rounded-lg flex flex-col"> <div> <div class="flex justify-between items-center mb-1"> <h3 class="tile-title text-lg font-semibold">Active Hours (<span id="active-hours-range-display"></span>)</h3> <span id="active-hours-count" class="text-sm text-muted">(0/0)</span> </div> <div id="active-hours-bar" class="bar-container"></div> </div> </div> <div class="tile p-6 rounded-lg flex flex-col items-center justify-center text-center"> <div class="flex items-center space-x-3 mb-3"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="12" y1="5" y2="9"></line><circle cx="12" cy="14" r="8"></circle></svg> <h2 class="tile-title text-xl font-semibold">Current 30-Min Slot</h2> </div> <div id="slot-timer-display" class="text-5xl font-bold text-primary mb-4">--:--</div> <p id="slots-passed" class="text-sm text-muted mt-2">-- slots passed today</p> </div> </div> <div class="tile p-6 rounded-lg"> <div class="flex justify-between items-center mb-2"> <h2 class="tile-title text-xl font-semibold">Task Checklist</h2></div> <div class="tab-container"> <button id="tab-tasks" class="tab-button active">Tasks</button> <button id="tab-history" class="tab-button">History</button> </div> <div class="mb-4"> <div class="flex justify-between mb-1"> <span class="text-sm font-medium text-primary-accent">Progress</span> <span id="progress-percentage" class="text-sm font-medium text-primary-accent">0%</span> </div> <div class="w-full progress-bar-bg rounded-full h-2.5"> <div id="progress-bar-inner" class="progress-bar-fill h-2.5 rounded-full" style="width: 0%"></div> </div> </div> <div id="task-list-container" class="space-y-1 max-h-60 overflow-y-auto pr-2 task-list-container"> <p class="text-muted italic text-center p-4">Loading tasks...</p> </div> <div id="history-log-container" class="hidden space-y-1 max-h-60 overflow-y-auto pr-2 history-log-container"> <p class="text-muted italic text-center p-4">No history yet.</p> </div> <div class="add-task-container"> <input type="text" id="new-task-input" placeholder="Add a new task..." class="input-field"> <button id="add-task-button" class="button-add"> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add </button> </div> </div> </div>
+
+    <script>
+        console.log("Script start.");
+        let appInitialized = false;
+
+        // --- DOM Elements ---
+        let dateDisplay, timeDisplay, slotTimerDisplay, slotsPassedDisplay, activeHoursBarContainer, activeHoursCountSpan, taskListContainer, newTaskInput, addTaskButton, progressBarInner, progressPercentage, themeButtons,
+            tabTasks, tabHistory, historyLogContainer, settingsButton, settingsModal, settingsOverlay, startHourSelect, endHourSelect, saveSettingsButton, closeSettingsButton, activeHoursRangeDisplay;
+
+        // --- State Variables ---
+        let tasks = [ { id: 1, text: 'Plan morning tasks', completed: true }, { id: 2, text: 'Check emails', completed: false }, { id: 3, text: 'Work on project X', completed: false }, { id: 4, text: 'Lunch break', completed: false }, ];
+        let nextTaskId = 5;
+        let taskHistory = [];
+        const DEFAULT_THEME = 'light';
+        let activeStartHour = 6; let activeEndHour = 21;
+        const SLOTS_PER_HOUR = 2;
+        let intervalId = null;
+        // Color sequence for future blocks
+        const futureColors = ['#fde047', '#f59e0b', '#ef4444', '#ec4899', '#a855f7', '#60a5fa', '#2dd4bf', '#84cc16']; // Yellow -> Amber -> Red -> Pink -> Purple -> Blue -> Teal -> Lime
+
+        // --- Utility Functions ---
+        function formatTime(seconds) { if (isNaN(seconds) || seconds < 0) return "--:--"; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`; }
+        function getThemeColor(variableName, fallbackColor = '#888888') { try { if (document.body) { const color = getComputedStyle(document.body).getPropertyValue(variableName).trim(); return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor; } const rootStyle = getComputedStyle(document.documentElement); const color = rootStyle.getPropertyValue(variableName).trim(); return color && (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) ? color : fallbackColor; } catch (e) { console.warn(`Error getting theme color ${variableName}:`, e); return fallbackColor; } }
+
+        // --- Settings Modal Logic ---
+        function openSettingsModal() { if (!settingsModal || !settingsOverlay || !startHourSelect || !endHourSelect) return; startHourSelect.value = activeStartHour; endHourSelect.value = activeEndHour; settingsModal.classList.remove('hidden'); settingsOverlay.classList.remove('hidden'); }
+        function closeSettingsModal() { if (!settingsModal || !settingsOverlay) return; settingsModal.classList.add('hidden'); settingsOverlay.classList.add('hidden'); }
+        function saveSettings() { if (!startHourSelect || !endHourSelect) return; const newStart = parseInt(startHourSelect.value, 10); const newEnd = parseInt(endHourSelect.value, 10); if (isNaN(newStart) || isNaN(newEnd) || newStart >= newEnd) { alert("Invalid hour selection. Start hour must be before end hour."); return; } activeStartHour = newStart; activeEndHour = newEnd; try { localStorage.setItem('timebox-activeStartHour', activeStartHour); localStorage.setItem('timebox-activeEndHour', activeEndHour); console.log("Active hours saved:", activeStartHour, activeEndHour); } catch (e) { console.error("Could not save active hours to localStorage:", e); } updateActiveHoursDisplay(); generateActiveHoursBar(); updateDateTime(); closeSettingsModal(); }
+        function loadSettings() { try { const savedStart = localStorage.getItem('timebox-activeStartHour'); const savedEnd = localStorage.getItem('timebox-activeEndHour'); if (savedStart !== null) activeStartHour = parseInt(savedStart, 10); if (savedEnd !== null) activeEndHour = parseInt(savedEnd, 10); console.log("Loaded active hours:", activeStartHour, activeEndHour); } catch (e) { console.error("Could not load active hours from localStorage:", e); } populateHourSelects(); updateActiveHoursDisplay(); }
+        function populateHourSelects() { if (!startHourSelect || !endHourSelect) { console.error("Hour select elements not found for population"); return; } startHourSelect.innerHTML = ''; endHourSelect.innerHTML = ''; for (let i = 0; i < 24; i++) { const startOption = document.createElement('option'); startOption.value = i; startOption.textContent = `${String(i).padStart(2, '0')}:00`; startHourSelect.appendChild(startOption); const endOption = document.createElement('option'); endOption.value = i + 1; endOption.textContent = `${String(i + 1).padStart(2, '0')}:00`; endHourSelect.appendChild(endOption); } }
+        function formatHourForDisplay(hour) { if (hour === 0 || hour === 24) return '12a'; if (hour === 12) return '12p'; if (hour < 12) return `${hour}a`; return `${hour - 12}p`; }
+        function updateActiveHoursDisplay() { if (!activeHoursRangeDisplay) { console.error("activeHoursRangeDisplay element not found"); return; } activeHoursRangeDisplay.textContent = `${formatHourForDisplay(activeStartHour)}-${formatHourForDisplay(activeEndHour)}`; }
+
+        // --- Theme Management ---
+        function applyTheme(themeName) { console.log(`Applying theme: ${themeName}`); document.body.dataset.theme = themeName; if(themeButtons){ themeButtons.forEach(btn => { btn.classList.toggle('active', btn.dataset.themeValue === themeName); }); } else { console.warn("Theme buttons not found when applying theme."); } if(appInitialized) updateDateTime(); }
+        function setupThemeSwitcher() { console.log("Setting up theme switcher..."); if (!themeButtons) { console.error("Theme buttons not found during setup."); return; } themeButtons.forEach(button => { button.addEventListener('click', () => { const selectedTheme = button.dataset.themeValue; applyTheme(selectedTheme); try { localStorage.setItem('timebox-theme', selectedTheme); } catch (e) { console.error("Could not save theme to localStorage:", e); } }); }); let savedTheme = null; try { savedTheme = localStorage.getItem('timebox-theme'); } catch (e) { console.error("Could not read theme from localStorage:", e); } const validThemes = ['light', 'grey', 'dark']; const themeToApply = validThemes.includes(savedTheme) ? savedTheme : DEFAULT_THEME; applyTheme(themeToApply); console.log(`Initial theme loaded: ${themeToApply}`); }
+
+        // --- Date, Time & Slot Update ---
+        function updateDateTime() {
+            try {
+                const now = new Date();
+                const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                if (dateDisplay) dateDisplay.textContent = now.toLocaleDateString('en-GB', dateOptions); else console.warn("dateDisplay not found");
+                if (timeDisplay) timeDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions).toLowerCase(); else console.warn("timeDisplay not found");
+                updateBarsHighlight(now);
+                updateSlotTimer(now);
+            } catch (error) { console.error("Error in updateDateTime:", error); if(intervalId) clearInterval(intervalId); }
+        }
+
+        // --- Time Bars (Tile 2) ---
+        function generateActiveHoursBar() { console.log("Generating active hours bar..."); if (!activeHoursBarContainer) { console.error("activeHoursBarContainer not found"); return; } activeHoursBarContainer.innerHTML = ''; const totalActiveSlots = (activeEndHour - activeStartHour) * SLOTS_PER_HOUR; if (totalActiveSlots <= 0 || !Number.isInteger(totalActiveSlots)) { console.warn("Invalid active hours range, no slots generated."); activeHoursBarContainer.innerHTML = '<p class="text-xs text-muted">Invalid range</p>'; return; } for (let i = 0; i < totalActiveSlots; i++) { const block = document.createElement('div'); block.classList.add('time-block'); const actualSlotIndex24 = (activeStartHour * SLOTS_PER_HOUR) + i; block.dataset.slotIndex24 = actualSlotIndex24; const hour = Math.floor(actualSlotIndex24 / SLOTS_PER_HOUR); const minute = (actualSlotIndex24 % SLOTS_PER_HOUR) * 30; const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`; block.title = `Slot: ${timeString}`; activeHoursBarContainer.appendChild(block); } console.log(`Generated ${totalActiveSlots} active slot blocks.`); }
+
+        // ** updateBarsHighlight - Re-applying JS colors for future blocks **
+        function updateBarsHighlight(currentTime) {
+            try {
+                const currentHour = currentTime.getHours(); const currentMinute = currentTime.getMinutes();
+                const currentSlotIndex24 = Math.floor((currentHour * 60 + currentMinute) / 30);
+                // Get theme colors needed for past/current styling via CSS
+                const currentBorderColor = getThemeColor('--grid-current-border', '#2563eb');
+                const pastBorderColor = getThemeColor('--grid-past-border', '#d1d5db');
+                const defaultBorderColor = getThemeColor('--grid-border', '#e2e8f0');
+
+                if (activeHoursBarContainer && activeHoursCountSpan) {
+                    const slotBlocks = activeHoursBarContainer.querySelectorAll('.time-block'); if(slotBlocks.length === 0) { activeHoursCountSpan.textContent = `(0/0)`; return; }
+                    let passedActiveSlots = 0; const activeStartSlotIndex = activeStartHour * SLOTS_PER_HOUR; const activeEndSlotIndex = activeEndHour * SLOTS_PER_HOUR;
+                    const firstFutureSlot = currentSlotIndex24 + 1; let futureBlockCounter = 0; // Counter for cycling colors
+
+                    slotBlocks.forEach(block => {
+                        const slotIndex24 = parseInt(block.dataset.slotIndex24, 10);
+                        // Reset classes and inline styles
+                        block.className = 'time-block';
+                        block.style.background = '';
+                        block.style.borderColor = '';
+                        block.style.boxShadow = '';
+
+                        if (slotIndex24 >= activeStartSlotIndex && slotIndex24 < activeEndSlotIndex) {
+                            if (slotIndex24 < currentSlotIndex24) {
+                                block.classList.add('past');
+                                // Past style is handled by CSS class
+                                passedActiveSlots++;
+                            } else if (slotIndex24 === currentSlotIndex24) {
+                                block.classList.add('current');
+                                // Current style is handled by CSS class
+                                passedActiveSlots++;
+                            } else { // Future
+                                block.classList.add('future');
+                                // ** Apply cycling color directly **
+                                const colorIndex = futureBlockCounter % futureColors.length;
+                                const blockColor = futureColors[colorIndex];
+                                block.style.background = blockColor; // Set solid color
+                                block.style.borderColor = defaultBorderColor; // Use default border
+                                futureBlockCounter++;
+                            }
+                        } else { // Treat blocks outside current range as 'past' visually
+                            block.classList.add('past');
+                        }
+                    });
+                    const totalActiveSlotsInCurrentRange = (activeEndHour - activeStartHour) * SLOTS_PER_HOUR;
+                    let displayPassedActive = 0;
+                    if (currentSlotIndex24 >= activeEndSlotIndex) { displayPassedActive = totalActiveSlotsInCurrentRange; }
+                    else if (currentSlotIndex24 >= activeStartSlotIndex) { displayPassedActive = currentSlotIndex24 - activeStartSlotIndex + 1; }
+                    displayPassedActive = Math.max(0, Math.min(displayPassedActive, totalActiveSlotsInCurrentRange));
+                    activeHoursCountSpan.textContent = `(${displayPassedActive}/${totalActiveSlotsInCurrentRange > 0 ? totalActiveSlotsInCurrentRange : 0})`;
+                } else { if (!activeHoursBarContainer) console.warn("activeHoursBarContainer not found in updateBarsHighlight"); if (!activeHoursCountSpan) console.warn("activeHoursCountSpan not found in updateBarsHighlight"); }
+            } catch (error) { console.error("Error updating bar highlights:", error); }
+        }
+
+
+        // --- Current Slot Timer Logic (Tile 3) ---
+        function updateSlotTimer(now) {
+             try { if (!slotTimerDisplay || !slotsPassedDisplay) return; const currentMinutes = now.getMinutes(); const currentSeconds = now.getSeconds(); const minutesIntoSlot = currentMinutes % 30; const secondsIntoSlot = minutesIntoSlot * 60 + currentSeconds; const totalSecondsInSlot = 30 * 60; const secondsRemaining = Math.max(0, totalSecondsInSlot - secondsIntoSlot - 1); slotTimerDisplay.textContent = formatTime(secondsRemaining); const currentHour = now.getHours(); const currentTotalMinutes = currentHour * 60 + currentMinutes; const currentSlotIndex = Math.floor(currentTotalMinutes / 30); slotsPassedDisplay.textContent = `${currentSlotIndex} slots passed today`; }
+             catch (error) { console.error("Error updating slot timer:", error); }
+        }
+
+        // --- Task History ---
+        function logHistoryEvent(action, taskText) { try { const event = { timestamp: new Date(), action: action, taskText: taskText }; taskHistory.unshift(event); console.log("History event logged:", event); if (tabHistory && tabHistory.classList.contains('active')) { renderHistory(); } } catch(e) { console.error("Error logging history event:", e); } }
+        function renderHistory() { if (!historyLogContainer) { console.error("History container not found"); return; } try { historyLogContainer.innerHTML = ''; if (taskHistory.length === 0) { historyLogContainer.innerHTML = '<p class="text-muted italic text-center p-4">No history yet.</p>'; return; } const historyFragment = document.createDocumentFragment(); taskHistory.forEach(event => { const entryDiv = document.createElement('div'); entryDiv.className = 'history-entry'; const timestampSpan = document.createElement('span'); timestampSpan.className = 'history-timestamp'; timestampSpan.textContent = event.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); const detailsSpan = document.createElement('span'); detailsSpan.className = 'history-details'; const actionSpan = document.createElement('span'); actionSpan.className = `history-action history-action-${event.action}`; actionSpan.textContent = `${event.action.charAt(0).toUpperCase() + event.action.slice(1)}: `; const textSpan = document.createElement('span'); textSpan.className = 'history-text'; textSpan.textContent = event.taskText; detailsSpan.appendChild(actionSpan); detailsSpan.appendChild(textSpan); entryDiv.appendChild(detailsSpan); entryDiv.appendChild(timestampSpan); historyFragment.appendChild(entryDiv); }); historyLogContainer.appendChild(historyFragment); } catch (error) { console.error("Error rendering history:", error); historyLogContainer.innerHTML = '<p class="text-red-500 italic text-center p-4">Error loading history.</p>'; } }
+
+        // --- Task Checklist ---
+         function renderTasks() {
+             if (!taskListContainer) { console.error("Task list container not found in renderTasks"); return; }
+             try {
+                 taskListContainer.innerHTML = '';
+                 if (tasks.length === 0) { taskListContainer.innerHTML = '<p class="text-muted italic text-center p-4">No tasks yet. Add one below!</p>'; }
+                 else { tasks.forEach(task => {
+                     const taskElement = document.createElement('div'); taskElement.className = `task-item ${task.completed ? 'completed' : ''}`; taskElement.dataset.taskId = task.id;
+                     const label = document.createElement('label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = task.completed; checkbox.addEventListener('change', () => toggleTask(task.id));
+                     const taskText = document.createElement('span'); taskText.textContent = task.text; label.appendChild(checkbox); label.appendChild(taskText);
+                     const deleteButton = document.createElement('button'); deleteButton.className = 'delete-button'; deleteButton.title = 'Delete Task'; deleteButton.addEventListener('click', () => deleteTask(task.id));
+                     deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+                     taskElement.appendChild(label); taskElement.appendChild(deleteButton); taskListContainer.appendChild(taskElement);
+                 }); }
+                 updateProgressBar();
+             } catch (error) { console.error("Error rendering tasks:", error); }
+         }
+        function addTask() { console.log("addTask called"); if (!newTaskInput || !taskListContainer) { console.error("Missing elements for addTask"); return; } const text = newTaskInput.value.trim(); console.log("Task text:", text); if (text) { try { const newTask = { id: nextTaskId++, text: text, completed: false }; tasks.push(newTask); logHistoryEvent('added', text); console.log("Tasks array after push:", tasks); newTaskInput.value = ''; renderTasks(); console.log("renderTasks called after add"); } catch (error) { console.error("Error adding task:", error); } } }
+        function toggleTask(id) { try { let originalTask = tasks.find(task => task.id === id); if (!originalTask) return; let originalText = originalTask.text; let wasCompleted = originalTask.completed; tasks = tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task); logHistoryEvent(wasCompleted ? 'uncompleted' : 'completed', originalText); renderTasks(); } catch(e) { console.error("Error toggling task:", e); } }
+        function deleteTask(id) { try { let taskToDelete = tasks.find(task => task.id === id); if (taskToDelete) { logHistoryEvent('deleted', taskToDelete.text); tasks = tasks.filter(task => task.id !== id); renderTasks(); } } catch(e) { console.error("Error deleting task:", e); } }
+
+        // --- Progress Bar ---
+        function updateProgressBar() { if (!progressBarInner || !progressPercentage) return; const completedTasks = tasks.filter(task => task.completed).length; const totalTasks = tasks.length; const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0; progressBarInner.style.width = `${percentage}%`; progressPercentage.textContent = `${percentage}%`; }
+
+        // --- Event Listeners ---
+        function setupEventListeners() { console.log("Setting up event listeners..."); try { if (addTaskButton) { addTaskButton.removeEventListener('click', addTask); addTaskButton.addEventListener('click', addTask); } else { console.error("Add task button not found for listener."); } if (newTaskInput) { newTaskInput.removeEventListener('keypress', handleTaskInputKeypress); newTaskInput.addEventListener('keypress', handleTaskInputKeypress); } else { console.error("New task input not found for listener."); } if (tabTasks && tabHistory) { tabTasks.removeEventListener('click', showTasksTab); tabTasks.addEventListener('click', showTasksTab); tabHistory.removeEventListener('click', showHistoryTab); tabHistory.addEventListener('click', showHistoryTab); } else { console.error("Tab elements not found for listeners."); } if(settingsButton) settingsButton.addEventListener('click', openSettingsModal); if(closeSettingsButton) closeSettingsButton.addEventListener('click', closeSettingsModal); if(settingsOverlay) settingsOverlay.addEventListener('click', closeSettingsModal); if(saveSettingsButton) saveSettingsButton.addEventListener('click', saveSettings); } catch (error) { console.error("Error setting up event listeners:", error); } console.log("Event listeners setup finished."); }
+        function handleTaskInputKeypress(event) { if (event.key === 'Enter') { addTask(); } }
+        function showTasksTab() { if (!taskListContainer || !historyLogContainer || !tabTasks || !tabHistory) return; taskListContainer.classList.remove('hidden'); historyLogContainer.classList.add('hidden'); tabTasks.classList.add('active'); tabHistory.classList.remove('active'); }
+        function showHistoryTab() { if (!taskListContainer || !historyLogContainer || !tabTasks || !tabHistory) return; taskListContainer.classList.add('hidden'); historyLogContainer.classList.remove('hidden'); tabTasks.classList.remove('active'); tabHistory.classList.add('active'); renderHistory(); }
+
+        // --- Initial Setup ---
+        function initializeApp() {
+            if (appInitialized) { console.warn("App already initialized. Skipping."); return; }
+            console.log("Initializing App...");
+            try {
+                console.log("Step 1: Selecting DOM elements...");
+                // Select ALL elements needed by the app upfront and check immediately
+                dateDisplay = document.getElementById('date-display'); if (!dateDisplay) throw new Error("Element not found: date-display");
+                timeDisplay = document.getElementById('time-display'); if (!timeDisplay) throw new Error("Element not found: time-display");
+                slotTimerDisplay = document.getElementById('slot-timer-display'); if (!slotTimerDisplay) throw new Error("Element not found: slot-timer-display");
+                slotsPassedDisplay = document.getElementById('slots-passed'); if (!slotsPassedDisplay) throw new Error("Element not found: slots-passed");
+                activeHoursBarContainer = document.getElementById('active-hours-bar'); if (!activeHoursBarContainer) throw new Error("Element not found: active-hours-bar");
+                activeHoursCountSpan = document.getElementById('active-hours-count'); if (!activeHoursCountSpan) throw new Error("Element not found: active-hours-count");
+                taskListContainer = document.getElementById('task-list-container'); if (!taskListContainer) throw new Error("Element not found: task-list-container");
+                newTaskInput = document.getElementById('new-task-input'); if (!newTaskInput) throw new Error("Element not found: new-task-input");
+                addTaskButton = document.getElementById('add-task-button'); if (!addTaskButton) throw new Error("Element not found: add-task-button");
+                progressBarInner = document.getElementById('progress-bar-inner'); if (!progressBarInner) throw new Error("Element not found: progress-bar-inner");
+                progressPercentage = document.getElementById('progress-percentage'); if (!progressPercentage) throw new Error("Element not found: progress-percentage");
+                themeButtons = document.querySelectorAll('.theme-button'); if (!themeButtons || themeButtons.length === 0) throw new Error("Elements not found: .theme-button");
+                tabTasks = document.getElementById('tab-tasks'); if (!tabTasks) throw new Error("Element not found: tab-tasks");
+                tabHistory = document.getElementById('tab-history'); if (!tabHistory) throw new Error("Element not found: tab-history");
+                historyLogContainer = document.getElementById('history-log-container'); if (!historyLogContainer) throw new Error("Element not found: history-log-container");
+                settingsButton = document.getElementById('settings-button'); if (!settingsButton) throw new Error("Element not found: settings-button");
+                settingsModal = document.getElementById('settings-modal'); if (!settingsModal) throw new Error("Element not found: settings-modal");
+                settingsOverlay = document.getElementById('settings-overlay'); if (!settingsOverlay) throw new Error("Element not found: settings-overlay");
+                startHourSelect = document.getElementById('setting-start-hour'); if (!startHourSelect) throw new Error("Element not found: setting-start-hour");
+                endHourSelect = document.getElementById('setting-end-hour'); if (!endHourSelect) throw new Error("Element not found: setting-end-hour");
+                saveSettingsButton = document.getElementById('save-settings-button'); if (!saveSettingsButton) throw new Error("Element not found: save-settings-button");
+                closeSettingsButton = document.getElementById('close-settings-button'); if (!closeSettingsButton) throw new Error("Element not found: close-settings-button");
+                activeHoursRangeDisplay = document.getElementById('active-hours-range-display'); if (!activeHoursRangeDisplay) throw new Error("Element not found: active-hours-range-display");
+                console.log("Step 1: Finished selecting DOM elements.");
+
+                console.log("Step 2: Loading settings...");
+                loadSettings();
+                console.log("Step 2: Finished loading settings.");
+
+                console.log("Step 3: Setting up theme switcher...");
+                setupThemeSwitcher();
+                console.log("Step 3: Finished setting up theme switcher.");
+
+                console.log("Step 4: Generating active hours bar...");
+                generateActiveHoursBar();
+                console.log("Step 4: Finished generating active hours bar.");
+
+                console.log("Step 5: Rendering initial tasks...");
+                renderTasks();
+                console.log("Step 5: Finished rendering initial tasks.");
+
+                console.log("Step 6: Setting up event listeners...");
+                setupEventListeners();
+                console.log("Step 6: Finished setting up event listeners.");
+
+                console.log("Step 7: Performing initial date/time update...");
+                updateDateTime();
+                console.log("Step 7: Finished initial date/time update.");
+
+                console.log("Step 8: Setting up update interval...");
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(updateDateTime, 1000);
+                console.log("Step 8: Finished setting up update interval.");
+
+                console.log("Step 9: Setting initial tab...");
+                showTasksTab();
+                console.log("Step 9: Finished setting initial tab.");
+
+                appInitialized = true;
+                console.log("App Initialized successfully.");
+
+            } catch(error) {
+                 console.error("Error during app initialization:", error);
+                 appInitialized = false;
+                 const body = document.querySelector('body');
+                 if (body) { body.innerHTML = `<div class="fixed inset-0 flex items-center justify-center bg-red-100 p-4"><div class="text-center"><h2 class="text-xl font-bold text-red-700 mb-2">Application Error</h2><p class="text-red-600">Could not load the Time Box app due to an internal error. Please check the developer console (F12) for details or try refreshing the page.</p><p class="text-sm text-red-500 mt-2">Error: ${error.message || 'Unknown error'}</p></div></div>`; }
+            }
+        }
+
+        // --- Run Init ---
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        console.log("Script end.");
+    </script>
+</body>
+</html>
